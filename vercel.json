@@ -1,11 +1,13 @@
 {
+  "version": 2,
   "functions": {
     "api/index.ts": {
-      "includeFiles": "prisma/dev.db"
+      "includeFiles": "prisma/**"
     }
   },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/admin", "destination": "/admin.html" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.ts" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }

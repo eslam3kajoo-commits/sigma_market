@@ -35,10 +35,10 @@ async function fetchHealthStatus() {
     }
   } catch (err) {
     if (statEl) {
-      statEl.textContent = 'غير متصل';
+      statEl.textContent = 'غير متصل (الخادم لا يستجيب)';
       statEl.style.color = '#ef4444';
     }
-    if (badgeEl) badgeEl.textContent = 'معطل';
+    if (badgeEl) badgeEl.textContent = 'فشل الاتصال';
   }
 }
 
@@ -80,7 +80,7 @@ async function loadProducts() {
       `).join('');
     }
   } catch (err) {
-    if (listEl) listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 20px; font-weight: 700;">تعذر تحميل كتالوج المنتجات.</div>`;
+    if (listEl) listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 20px; font-weight: 700;">تعذر الاتصال بالخادم لجلب المنتجات. يرجى التأكد من تشغيل السيرفر وحالة الاتصال بالشبكة.</div>`;
   }
 }
 
@@ -225,10 +225,10 @@ window.demoLogin = async function(roleName) {
         if (catalogTab) catalogTab.click();
       }
     } else {
-      alert(`خطأ أثناء الدخول التجريبي: ${data.message}`);
+      alert(`خطأ أثناء الدخول التجريبي: ${data.message || 'تعذر معالجة الطلب'}`);
     }
   } catch (err) {
-    alert('فشل الاتصال بالخادم للدخول التجريبي.');
+    alert('فشل الاتصال بالخادم للدخول التجريبي. يرجى التأكد من تشغيل السيرفر وحالة الاتصال بالشبكة.');
   }
 };
 
@@ -311,10 +311,10 @@ function setupAuthModal() {
         const userRoleAr = ROLE_MAP[data.data.user.role] || data.data.user.role;
         alert(`مرحباً بك، ${data.data.user.fullName || data.data.user.email}! تم تفعيل الحساب كـ (${userRoleAr}).`);
       } else {
-        alert(`خطأ: ${data.message}`);
+        alert(`خطأ في عملية المصادقة: ${data.message || 'بيانات الدخول غير صحيحة'}`);
       }
     } catch (err) {
-      alert('فشلت عملية طلب المصادقة. يرجى التأكد من البيانات والخادم.');
+      alert('فشلت عملية طلب المصادقة due to network or server failure. يرجى التأكد من تشغيل السيرفر وحالة الاتصال بالشبكة.');
     }
   });
 }

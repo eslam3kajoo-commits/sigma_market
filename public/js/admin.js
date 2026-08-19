@@ -91,7 +91,7 @@ async function loadAdminUsers() {
       }).join('');
     }
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; font-weight: 700;">تعذر تحميل قائمة المستخدمين.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; font-weight: 700;">تعذر الاتصال بالخادم لجلب قائمة المستخدمين. يرجى التأكد من تشغيل السيرفر وحالة الاتصال.</td></tr>`;
   }
 }
 
