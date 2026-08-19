@@ -13,7 +13,7 @@ build/
 # Databases & Local Data
 *.db
 *.db-journal
-prisma/*.db
+!prisma/dev.db
 prisma/*.db-journal
 *.sqlite
 
