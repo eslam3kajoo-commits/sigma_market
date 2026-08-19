@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سيجما ماركت - Sigma Market | لوحة التحكم وإدارة المنتجات</title>
+  <meta name="description" content="منصة سيجما ماركت - Sigma Market - نظام متكامل لإدارة المنتجات، التتبع بالباركود، وإدارة الصلاحيات والتخفيضات الفورية.">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="#" class="brand-logo">
+        <span class="brand-badge">سيجما ماركت</span>
+        <span>سيجما ماركت - Sigma Market</span>
+      </a>
+
+      <div class="nav-actions">
+        <a id="btn-admin-panel" href="./admin.html" class="btn btn-outline" style="display: none; border-color: var(--primary); color: var(--primary); font-weight: 800;">
+          👑 لوحة تحكم الإدارة
+        </a>
+        <div id="user-pill" style="display: none;" class="badge badge-info">
+          <span id="user-role-badge">عميل</span> | <span id="user-name">مستخدم</span>
+        </div>
+        <button id="btn-login-modal" class="btn btn-primary">تسجيل الدخول / حساب جديد</button>
+        <button id="btn-logout" class="btn btn-outline" style="display: none;">تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Status Section -->
+  <main class="container">
+    <section class="hero-section">
+      <div class="hero-badge">🛒 نظام إدارة المبيعات والضمان لسيجما ماركت</div>
+      <h1 class="hero-title">محرك سيجما ماركت - Sigma Market</h1>
+      <p class="hero-subtitle">
+        بنية مؤسسية متكاملة لإدارة منتجات سيجما ماركت، الضمان، تتبع الباركود، وإدارة تخفيضات الصلاحية الفورية وتوزيع الأدوار.
+      </p>
+    </section>
+
+    <!-- Key Metrics Cards (Interactive Action Cards) -->
+    <div class="dashboard-grid">
+      <div class="card" id="card-api-status" style="cursor: pointer;" title="انقر لإعادة فحص اتصال خوادم الـ API">
+        <div class="card-title">
+          <span>حالة الـ API</span>
+          <span class="badge badge-success" id="api-status-badge">نشط</span>
+        </div>
+        <div class="card-value" id="stat-api-status">جاري الاتصال...</div>
+        <div class="card-subtitle">اضغط هنا لإعادة فحص الخادم بالوقت الفعلي</div>
+      </div>
+
+      <div class="card" id="card-active-role" style="cursor: pointer;" title="انقر للانتقال إلى تبويب الأدوار والصلاحيات وتجربتها">
+        <div class="card-title">
+          <span>الدور الحالي</span>
+          <span class="badge badge-info" id="stat-role-badge">زائر</span>
+        </div>
+        <div class="card-value" id="stat-active-role">زائر متصفح</div>
+        <div class="card-subtitle" id="stat-role-desc">اضغط هنا لعرض الأدوار والتنقل بين الصلاحيات</div>
+      </div>
+
+      <div class="card" id="card-product-count" style="cursor: pointer;" title="انقر للانتقال الفوري إلى كتالوج المنتجات">
+        <div class="card-title">
+          <span>إجمالي المنتجات</span>
+          <span class="badge badge-warning">الكتالوج</span>
+        </div>
+        <div class="card-value" id="stat-product-count">0</div>
+        <div class="card-subtitle">اضغط هنا لاستعراض كتالوج المنتجات والضمان</div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="tab-container">
+      <button class="tab-btn active" data-tab="catalog">كتالوج المنتجات والضمان</button>
+      <button class="tab-btn" data-tab="roles">نظام الأدوار والصلاحيات (RBAC)</button>
+      <button class="tab-btn" data-tab="barcode">فحص الباركود والضمان</button>
+      <button class="tab-btn" data-tab="create-product" id="tab-create-product-btn" style="display: none;">+ إضافة منتج جديد (التاجر)</button>
+    </div>
+
+    <!-- Tab 1: Catalog Content -->
+    <div id="tab-catalog" class="tab-content">
+      <div class="product-grid" id="product-list">
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px; font-weight: 600;">
+          جاري تحميل المنتجات...
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: System Roles Content -->
+    <div id="tab-roles" class="tab-content" style="display: none;">
+      <div class="card">
+        <h2 style="margin-bottom: 12px; font-size: 1.5rem;">أدوار وصلاحيات النظام (RBAC)</h2>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">
+          يعتمد النظام على 4 أدوار أساسية. يمكنك تسجيل الدخول بكل دور لاختبار حماية المسارات والصلاحيات بالوقت الفعلي.
+        </p>
+
+        <div class="dashboard-grid" id="roles-list">
+          <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-weight: 600;">جاري تحميل أدوار النظام...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Barcode Warranty Lookup -->
+    <div id="tab-barcode" class="tab-content" style="display: none;">
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <h2 style="margin-bottom: 12px; font-size: 1.5rem;">فحص الضمان عبر الباركود</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">
+          أدخل أي رقم باركود للمنتج للتحقق السريع من حالة الضمان وتاريخ انتهاء الصلاحية.
+        </p>
+
+        <form id="barcode-search-form">
+          <div class="form-group">
+            <label class="form-label" for="barcode-input">رقم باركود المنتج</label>
+            <input type="text" id="barcode-input" class="form-input" placeholder="مثال: SW-OLED-4K-001" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">فحص حالة الضمان والصلاحية</button>
+        </form>
+
+        <div id="barcode-result" style="margin-top: 24px;"></div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Add Product (Merchant / Admin) -->
+    <div id="tab-create-product" class="tab-content" style="display: none;">
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <h2 style="margin-bottom: 12px; font-size: 1.5rem;">تسجيل منتج جديد في المتجر</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">
+          مسار محمي للتجار والمدراء: يتيح إضافة منتج مع تحديد الكمية وتاريخ انتهاء الصلاحية والضمان.
+        </p>
+
+        <form id="create-product-form">
+          <div class="form-group">
+            <label class="form-label" for="prod-name">اسم المنتج</label>
+            <input type="text" id="prod-name" class="form-input" required placeholder="مثال: جهاز منزلي ذكي X1">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-desc">وصف المنتج</label>
+            <input type="text" id="prod-desc" class="form-input" required placeholder="جهاز ذكي عالي الأداء مع ضمان لمدة سنتين">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" for="prod-price">السعر ($)</label>
+              <input type="number" step="0.01" id="prod-price" class="form-input" required placeholder="199.99">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prod-stock">الكمية بالمخزون</label>
+              <input type="number" id="prod-stock" class="form-input" required placeholder="50">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-barcode">الباركود الفريد</label>
+            <input type="text" id="prod-barcode" class="form-input" required placeholder="SW-PROD-9988">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-expiry">تاريخ انتهاء الصلاحية / الضمان</label>
+            <input type="date" id="prod-expiry" class="form-input">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">تسجيل المنتج في الكتالوج</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Login / Register Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 id="modal-title" style="font-size: 1.5rem;">تسجيل الدخول</h2>
+        <button id="modal-close" style="background: none; border: none; color: var(--text-muted); font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+
+      <form id="auth-form">
+        <div class="form-group" id="group-fullname" style="display: none;">
+          <label class="form-label" for="auth-fullname">الاسم الكامل</label>
+          <input type="text" id="auth-fullname" class="form-input" placeholder="أحمد محمود">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="auth-email">البريد الإلكتروني</label>
+          <input type="email" id="auth-email" class="form-input" required placeholder="user@smartwarranty.local">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="auth-password">كلمة المرور</label>
+          <input type="password" id="auth-password" class="form-input" required placeholder="••••••••">
+        </div>
+
+        <div class="form-group" id="group-role" style="display: none;">
+          <label class="form-label" for="auth-role">نوع الحساب</label>
+          <select id="auth-role" class="form-select">
+            <option value="Customer">عميل (مستخدم عادي)</option>
+            <option value="Merchant">تاجر (مدير المتجر)</option>
+            <option value="Charity">جمعية خيرية</option>
+            <option value="Admin">مدير النظام (أدمن)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;" id="auth-submit-btn">تسجيل الدخول</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+        <span id="auth-toggle-text">ليس لديك حساب؟</span>
+        <a href="#" id="auth-toggle-btn" style="color: var(--primary); font-weight: 700; text-decoration: none; margin-right: 6px;">إنشاء حساب جديد</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      سيجما ماركت - Sigma Market &copy; 2026. البنية التحتية والأنظمة جاهزة للمتاجر الذكية.
+    </div>
+  </footer>
+
+  <script src="./js/auth.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

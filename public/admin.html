@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سيجما ماركت - Sigma Market | لوحة تحكم الإدارة</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .admin-nav { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border-color); }
+    .admin-nav-btn { background: none; border: none; color: var(--text-muted); padding: 12px 20px; cursor: pointer; font-weight: 700; font-family: var(--font-family); font-size: 1rem; border-bottom: 3px solid transparent; transition: all 0.2s ease; }
+    .admin-nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .table-responsive { overflow-x: auto; margin-top: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+    table { width: 100%; border-collapse: collapse; text-align: right; background: #ffffff; }
+    th, td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); font-size: 0.92rem; }
+    th { background: var(--bg-surface-elevated); color: var(--text-main); font-weight: 800; }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="./index.html" class="brand-logo">
+        <span class="brand-badge">إدارة النظام</span>
+        <span>سيجما ماركت - Sigma Market</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="./index.html" class="btn btn-outline">العودة لبوابة المستخدمين</a>
+        <button id="btn-admin-logout" class="btn btn-outline">تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 40px;">
+    <!-- Access Denied Card (Visible if non-admin) -->
+    <div id="admin-unauthorized-card" class="card" style="display: none; max-width: 600px; margin: 40px auto; text-align: center;">
+      <h2 style="color: #ef4444; margin-bottom: 12px; font-size: 1.6rem;">🚫 تم رفض الوصول</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">
+        يجب عليك تسجيل الدخول بحساب <strong>مدير النظام (أدمن)</strong> للوصول إلى لوحة التحكم هذه.
+      </p>
+      <a href="./index.html" class="btn btn-primary">العودة للبوابة وتسجيل الدخول كأدمن</a>
+    </div>
+
+    <!-- Admin Panel Body (Visible to Admin) -->
+    <div id="admin-panel-body" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 style="font-size: 2.2rem; font-weight: 900;">لوحة تحكم مدير النظام</h1>
+          <p style="color: var(--text-muted); font-weight: 500;">مراقبة بيانات المنصة بالوقت الفعلي، إدارة حسابات المستخدمين ومتابعة صحة النظام.</p>
+        </div>
+        <span class="badge badge-success" id="admin-status-indicator">جلسة المسؤول نشطة</span>
+      </div>
+
+      <!-- Real-Time Metrics Grid -->
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-title">إجمالي المستخدمين</div>
+          <div class="card-value" id="m-users">...</div>
+          <div class="card-subtitle">حسابات المنصة المسجلة</div>
+        </div>
+        <div class="card">
+          <div class="card-title">التجار ومدراء المتاجر</div>
+          <div class="card-value" id="m-merchants">...</div>
+          <div class="card-subtitle">إدارة الفروع والمتاجر</div>
+        </div>
+        <div class="card">
+          <div class="card-title">العملاء</div>
+          <div class="card-value" id="m-customers">...</div>
+          <div class="card-subtitle">المستفيدين والمشترين</div>
+        </div>
+        <div class="card">
+          <div class="card-title">الجمعيات الخيرية</div>
+          <div class="card-value" id="m-charities">...</div>
+          <div class="card-subtitle">شركاء التبرعات بالمنتجات</div>
+        </div>
+        <div class="card">
+          <div class="card-title">إجمالي المنتجات</div>
+          <div class="card-value" id="m-products">...</div>
+          <div class="card-subtitle">منتجات الضمان المسجلة</div>
+        </div>
+      </div>
+
+      <!-- Admin Section Tabs -->
+      <div class="admin-nav">
+        <button class="admin-nav-btn active" data-admin-tab="users">إدارة حسابات المستخدمين</button>
+        <button class="admin-nav-btn" data-admin-tab="system">نظرة عامة على النظام والوحدات</button>
+      </div>
+
+      <!-- Tab 1: User Management -->
+      <div id="admin-tab-users">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
+            <h2 style="font-size: 1.4rem;">سجل مستخدمي المنصة</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; width: 100%; max-width: 440px;">
+              <input type="text" id="user-search-input" class="form-input" placeholder="بحث بالبريد أو الاسم..." style="flex: 1; min-width: 180px;">
+              <select id="user-role-filter" class="form-select" style="width: 150px; min-width: 140px;">
+                <option value="">جميع الأدوار</option>
+                <option value="Customer">عميل</option>
+                <option value="Merchant">تاجر</option>
+                <option value="Charity">جمعية خيرية</option>
+                <option value="Admin">مدير النظام</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>الاسم الكامل</th>
+                  <th>البريد الإلكتروني</th>
+                  <th>الدور</th>
+                  <th>الحالة</th>
+                  <th>تاريخ الانضمام</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody">
+                <tr><td colspan="6" style="text-align: center; color: var(--text-muted); font-weight: 600;">جاري تحميل قائمة المستخدمين...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: System Overview & Placeholder Modules -->
+      <div id="admin-tab-system" style="display: none;">
+        <div class="card">
+          <h2 style="margin-bottom: 12px; font-size: 1.4rem;">مراقبة تكامل الوحدات البرمجية</h2>
+          <p style="color: var(--text-muted); margin-bottom: 24px;">
+            10 وحدات وظيفية نموذجية يتم مراقبتها بواسطة تشخيصات النظام الذكي.
+          </p>
+
+          <div class="dashboard-grid">
+            <div class="card" style="background: var(--bg-surface-elevated);">
+              <h3 style="font-size: 1.1rem; color: var(--primary);">وحدة المنتجات والمخزون</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">سجل الباركود ومراقبة حركة المخزون.</p>
+              <span class="badge badge-success" style="margin-top: 12px;">نشط ومفعل</span>
+            </div>
+            <div class="card" style="background: var(--bg-surface-elevated);">
+              <h3 style="font-size: 1.1rem; color: var(--primary);">إدارة الصلاحية والضمان</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">تنبيهات وإشعارات انتهاء فترة الضمان والصلاحية.</p>
+              <span class="badge badge-success" style="margin-top: 12px;">نشط ومفعل</span>
+            </div>
+            <div class="card" style="background: var(--bg-surface-elevated);">
+              <h3 style="font-size: 1.1rem; color: var(--primary);">ذكاء تسعير المنتجات (AI)</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">خصومات وتخفيضات تلقائية عند اقتراب انتهاء الصلاحية.</p>
+              <span class="badge badge-info" style="margin-top: 12px;">جاهز للتكامل</span>
+            </div>
+            <div class="card" style="background: var(--bg-surface-elevated);">
+              <h3 style="font-size: 1.1rem; color: var(--primary);">تبرعات الجمعيات الخيرية</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">إدارة التبرعات بالأغذية والمستلزمات قبل انتهائها.</p>
+              <span class="badge badge-info" style="margin-top: 12px;">جاهز للتكامل</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./js/auth.js"></script>
+  <script src="./js/admin.js"></script>
+</body>
+</html>

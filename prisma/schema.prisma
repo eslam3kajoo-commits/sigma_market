@@ -1,0 +1,371 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  permissions String   // JSON array string of permission identifiers
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+
+  @@map("roles")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  phoneNumber  String?
+  status       String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, PENDING
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  addresses          Address[]
+  products           Product[]           @relation("MerchantProducts")
+  orders             Order[]             @relation("CustomerOrders")
+  donations          Donation[]          @relation("CharityDonations")
+  notifications      Notification[]
+  inventoryMovements InventoryMovement[] @relation("UserInventoryMovements")
+  merchantProfile    MerchantProfile?
+  auditLogs          AuditLog[]          @relation("UserAuditLogs")
+  warrantyClaims     WarrantyClaim[]     @relation("CustomerWarrantyClaims")
+
+  @@index([email])
+  @@index([roleId])
+  @@map("users")
+}
+
+model MerchantProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  type        String   @default("MERCHANT") // MERCHANT, CHARITY
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  details     String?  // JSON string
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  payouts Payout[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@map("merchant_profiles")
+}
+
+model SystemSetting {
+  id             String   @id @default(uuid())
+  settingKey     String   @unique
+  commissionRate Float    @default(0.10) // e.g. 10% (0.10)
+  updatedAt      DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  ipAddress String?
+  details   String?  // JSON string
+  timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  street     String
+  city       String
+  state      String
+  postalCode String
+  country    String   @default("Saudi Arabia")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("SubCategories")
+  products    Product[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([name])
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  merchantId  String
+  merchant    User     @relation("MerchantProducts", fields: [merchantId], references: [id], onDelete: Restrict)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  name        String
+  description String
+  price       Float
+  barcode     String   @unique
+  stock       Int      @default(0)
+  status      String   @default("AVAILABLE") // AVAILABLE, OUT_OF_STOCK, DISCONTINUED
+  expiryDate  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  inventory        Inventory?
+  expiryInfo       ExpiryInfo?
+  pricingDiscounts PricingDiscount[]
+  orderItems       OrderItem[]
+  donations        Donation[]
+  warranties       Warranty[]
+
+  @@index([merchantId])
+  @@index([categoryId])
+  @@index([barcode])
+  @@index([status])
+  @@index([expiryDate])
+  @@map("products")
+}
+
+model Inventory {
+  id            String   @id @default(uuid())
+  productId     String   @unique
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  merchantId    String
+  quantity      Int      @default(0)
+  minStockLevel Int      @default(5)
+  updatedAt     DateTime @updatedAt
+
+  movements InventoryMovement[]
+
+  @@index([merchantId])
+  @@index([productId])
+  @@map("inventories")
+}
+
+model InventoryMovement {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  type        String    // ADD, DEDUCT, ADJUSTMENT
+  quantity    Int
+  reason      String
+  createdById String
+  createdBy   User      @relation("UserInventoryMovements", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime  @default(now())
+
+  @@index([inventoryId])
+  @@index([type])
+  @@map("inventory_movements")
+}
+
+model Order {
+  id             String   @id @default(uuid())
+  customerId     String
+  customer       User     @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Restrict)
+  addressId      String?
+  address        Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  totalAmount    Float
+  status         String   @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  trackingNumber String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  items      OrderItem[]
+  warranties Warranty[]
+  payments   Payment[]
+  delivery   Delivery?
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int
+  unitPrice Float
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model ExpiryInfo {
+  id               String   @id @default(uuid())
+  productId        String   @unique
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  manufactureDate  DateTime?
+  expiryDate       DateTime
+  alertDaysBefore  Int      @default(30)
+  isExpired        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([expiryDate])
+  @@index([isExpired])
+  @@map("expiry_info")
+}
+
+model PricingDiscount {
+  id                 String   @id @default(uuid())
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  originalPrice      Float
+  discountedPrice    Float
+  discountPercentage Float
+  startDate          DateTime
+  endDate            DateTime
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([productId])
+  @@index([isActive])
+  @@map("pricing_discounts")
+}
+
+model Donation {
+  id          String    @id @default(uuid())
+  charityId   String
+  charity     User      @relation("CharityDonations", fields: [charityId], references: [id], onDelete: Restrict)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity    Int
+  status      String    @default("REQUESTED") // REQUESTED, APPROVED, REJECTED, COMPLETED
+  requestedAt DateTime  @default(now())
+  fulfilledAt DateTime?
+
+  @@index([charityId])
+  @@index([productId])
+  @@index([status])
+  @@map("donations")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, EXpiry_ALERT, ORDER_UPDATE
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+model Warranty {
+  id           String   @id @default(uuid())
+  serialNumber String   @unique
+  qrCode       String?
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  startDate    DateTime @default(now())
+  endDate      DateTime
+  status       String   @default("ACTIVE") // ACTIVE, EXPIRED, CLAIMED
+
+  claims WarrantyClaim[]
+
+  @@index([serialNumber])
+  @@index([productId])
+  @@index([orderId])
+  @@index([status])
+  @@map("warranties")
+}
+
+model WarrantyClaim {
+  id               String   @id @default(uuid())
+  warrantyId       String
+  warranty         Warranty @relation(fields: [warrantyId], references: [id], onDelete: Restrict)
+  customerId       String
+  customer         User     @relation("CustomerWarrantyClaims", fields: [customerId], references: [id], onDelete: Restrict)
+  issueDescription String
+  claimStatus      String   @default("PENDING") // PENDING, APPROVED, REJECTED, COMPLETED
+  claimType        String   @default("REPAIR")  // REPAIR, REPLACEMENT
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([warrantyId])
+  @@index([customerId])
+  @@index([claimStatus])
+  @@map("warranty_claims")
+}
+
+model Payment {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Float
+  status    String   @default("PENDING") // PENDING, PAID, FAILED
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Payout {
+  id                 String          @id @default(uuid())
+  merchantId         String
+  merchant           MerchantProfile @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  amount             Float
+  platformCommission Float
+  netAmount          Float
+  status             String          @default("PENDING") // PENDING, COMPLETED, FAILED
+  createdAt          DateTime        @default(now())
+
+  @@index([merchantId])
+  @@index([status])
+  @@map("payouts")
+}
+
+model Delivery {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driverName     String
+  driverPhone    String
+  deliveryStatus String   @default("ASSIGNED") // ASSIGNED, OUT_FOR_DELIVERY, DELIVERED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([deliveryStatus])
+  @@map("deliveries")
+}
