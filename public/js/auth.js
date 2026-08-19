@@ -2,7 +2,7 @@
    Sigma Market - Client Authentication State Manager
    ========================================================================== */
 
-const API_BASE = (window.location.port === '3000') ? '' : 'http://localhost:3000';
+const API_BASE = '';
 
 const ROLE_MAP = {
   'Admin': 'مدير النظام (أدمن)',

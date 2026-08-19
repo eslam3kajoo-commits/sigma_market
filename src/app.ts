@@ -31,17 +31,10 @@ app.use(helmet({
   contentSecurityPolicy: false
 }));
 
-// Dynamic CORS Configuration for local dev servers & production
+// Dynamic CORS Configuration allowing requests from any origin for LAN & local development
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow any origin in development or when CORS_ORIGIN is '*'
-    if (!origin || config.corsOrigin === '*' || config.nodeEnv !== 'production') {
-      return callback(null, true);
-    }
-    const allowedOrigins = [config.corsOrigin, 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'];
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+    // Allow any origin (LAN devices, mobile phones, localhost, cloud domains)
     return callback(null, true);
   },
   credentials: true,

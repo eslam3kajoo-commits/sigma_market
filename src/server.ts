@@ -2,11 +2,11 @@ import app from './app';
 import { config } from './config';
 import { prisma } from './utils/prisma';
 
-const server = app.listen(config.port, () => {
+const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(`==================================================`);
   console.log(`Smart Warranty Platform Server Running`);
   console.log(`Environment: ${config.nodeEnv}`);
-  console.log(`URL:         http://localhost:${config.port}`);
+  console.log(`URL:         http://0.0.0.0:${config.port} (LAN & Localhost)`);
   console.log(`==================================================`);
 });
 
