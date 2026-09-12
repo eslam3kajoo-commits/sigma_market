@@ -6,6 +6,22 @@
   <title>سيجما ماركت - Sigma Market | لوحة التحكم وإدارة المنتجات</title>
   <meta name="description" content="منصة سيجما ماركت - Sigma Market - نظام متكامل لإدارة المنتجات، التتبع بالباركود، وإدارة الصلاحيات والتخفيضات الفورية.">
   <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--bg-surface);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+    .modal-lg {
+      max-width: 650px;
+    }
+  </style>
 </head>
 <body>
 
@@ -36,11 +52,11 @@
       <div class="hero-badge">🛒 نظام إدارة المبيعات والضمان لسيجما ماركت</div>
       <h1 class="hero-title">محرك سيجما ماركت - Sigma Market</h1>
       <p class="hero-subtitle">
-        بنية مؤسسية متكاملة لإدارة منتجات سيجما ماركت، الضمان، تتبع الباركود، وإدارة تخفيضات الصلاحية الفورية وتوزيع الأدوار.
+        بنية مؤسسية متكاملة لإدارة منتجات سيجما ماركت، الأقسام، الضمان، تتبع ومسح الباركود، وإدارة المخزون والتخفيضات الفورية.
       </p>
     </section>
 
-    <!-- Key Metrics Cards (Interactive Action Cards) -->
+    <!-- Key Metrics Cards -->
     <div class="dashboard-grid">
       <div class="card" id="card-api-status" style="cursor: pointer;" title="انقر لإعادة فحص اتصال خوادم الـ API">
         <div class="card-title">
@@ -80,6 +96,19 @@
 
     <!-- Tab 1: Catalog Content -->
     <div id="tab-catalog" class="tab-content">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div style="flex: 1; min-width: 200px;">
+          <input type="text" id="catalog-search-input" class="form-input" placeholder="🔍 بحث باسم المنتج، الوصف، أو الباركود...">
+        </div>
+        <div style="width: 220px;">
+          <select id="catalog-category-filter" class="form-select">
+            <option value="">جميع الأقسام (Categories)</option>
+          </select>
+        </div>
+        <button id="btn-refresh-catalog" class="btn btn-outline" style="padding: 10px 16px;">تحديث</button>
+      </div>
+
       <div class="product-grid" id="product-list">
         <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px; font-weight: 600;">
           جاري تحميل المنتجات...
@@ -106,13 +135,16 @@
       <div class="card" style="max-width: 600px; margin: 0 auto;">
         <h2 style="margin-bottom: 12px; font-size: 1.5rem;">فحص الضمان عبر الباركود</h2>
         <p style="color: var(--text-muted); margin-bottom: 20px;">
-          أدخل أي رقم باركود للمنتج للتحقق السريع من حالة الضمان وتاريخ انتهاء الصلاحية.
+          أدخل أو امسح الباركود لقراءة البيانات والتحقق السريع من حالة الضمان وتاريخ الانتهاء.
         </p>
 
         <form id="barcode-search-form">
           <div class="form-group">
             <label class="form-label" for="barcode-input">رقم باركود المنتج</label>
-            <input type="text" id="barcode-input" class="form-input" placeholder="مثال: SW-OLED-4K-001" required>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="barcode-input" class="form-input" placeholder="مثال: SW-OLED-4K-001" required style="flex: 1;">
+              <button type="button" class="btn btn-outline btn-scan-camera" data-target="barcode-input" style="white-space: nowrap; font-weight: 700;">📷 مسح بالكاميرا</button>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%;">فحص حالة الضمان والصلاحية</button>
         </form>
@@ -126,10 +158,17 @@
       <div class="card" style="max-width: 600px; margin: 0 auto;">
         <h2 style="margin-bottom: 12px; font-size: 1.5rem;">تسجيل منتج جديد في المتجر</h2>
         <p style="color: var(--text-muted); margin-bottom: 20px;">
-          مسار محمي للتجار والمدراء: يتيح إضافة منتج مع تحديد الكمية وتاريخ انتهاء الصلاحية والضمان.
+          مسار محمي للتجار والمدراء: يتيح مسح الباركود، تحديد القسم، السعر، والكمية بالمخزون.
         </p>
 
         <form id="create-product-form">
+          <div class="form-group">
+            <label class="form-label" for="prod-barcode">الباركود الفريد (Barcode)</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="prod-barcode" class="form-input" required placeholder="SW-PROD-9988" style="flex: 1;">
+              <button type="button" class="btn btn-outline btn-scan-camera" data-target="prod-barcode" style="white-space: nowrap; font-weight: 700;">📷 مسح بالكاميرا</button>
+            </div>
+          </div>
           <div class="form-group">
             <label class="form-label" for="prod-name">اسم المنتج</label>
             <input type="text" id="prod-name" class="form-input" required placeholder="مثال: جهاز منزلي ذكي X1">
@@ -138,6 +177,12 @@
             <label class="form-label" for="prod-desc">وصف المنتج</label>
             <input type="text" id="prod-desc" class="form-input" required placeholder="جهاز ذكي عالي الأداء مع ضمان لمدة سنتين">
           </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-category">قسم المنتج (Category)</label>
+            <select id="prod-category" class="form-select" required>
+              <option value="">جاري تحميل الأقسام...</option>
+            </select>
+          </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div class="form-group">
               <label class="form-label" for="prod-price">السعر ($)</label>
@@ -145,12 +190,8 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="prod-stock">الكمية بالمخزون</label>
-              <input type="number" id="prod-stock" class="form-input" required placeholder="50">
+              <input type="number" id="prod-stock" class="form-input" required placeholder="50" min="0">
             </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="prod-barcode">الباركود الفريد</label>
-            <input type="text" id="prod-barcode" class="form-input" required placeholder="SW-PROD-9988">
           </div>
           <div class="form-group">
             <label class="form-label" for="prod-expiry">تاريخ انتهاء الصلاحية / الضمان</label>
@@ -161,6 +202,96 @@
       </div>
     </div>
   </main>
+
+  <!-- Camera Scanner Modal -->
+  <div class="modal-overlay" id="camera-scanner-modal">
+    <div class="modal-content" style="max-width: 520px; text-align: center;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.3rem;">📷 مسح الباركود بالكاميرا</h3>
+        <button type="button" onclick="closeCameraScannerModal()" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">قم بتوجيه كاميرا الجهاز نحو الباركود للقراءة المباشرة والتلقائية.</p>
+      <div id="qr-reader" style="width: 100%; border-radius: 12px; overflow: hidden; background: #0f172a; min-height: 260px;"></div>
+      <button type="button" onclick="closeCameraScannerModal()" class="btn btn-outline" style="margin-top: 16px; width: 100%;">إلغاء وإغلاق الكاميرا</button>
+    </div>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div class="modal-overlay" id="edit-product-modal">
+    <div class="modal-content modal-lg">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.5rem;">تعديل بيانات المنتج</h2>
+        <button class="modal-close-btn" onclick="closeEditModal()" style="background: none; border: none; font-size: 1.8rem; cursor: pointer;">&times;</button>
+      </div>
+      <form id="edit-product-form">
+        <input type="hidden" id="edit-prod-id">
+        <div class="form-group">
+          <label class="form-label" for="edit-prod-barcode">الباركود</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="edit-prod-barcode" class="form-input" required style="flex: 1;">
+            <button type="button" class="btn btn-outline btn-scan-camera" data-target="edit-prod-barcode" style="white-space: nowrap; font-weight: 700;">📷 مسح بالكاميرا</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-prod-name">اسم المنتج</label>
+          <input type="text" id="edit-prod-name" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-prod-desc">الوصف</label>
+          <input type="text" id="edit-prod-desc" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-prod-category">القسم (Category)</label>
+          <select id="edit-prod-category" class="form-select" required></select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label" for="edit-prod-price">السعر ($)</label>
+            <input type="number" step="0.01" id="edit-prod-price" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-prod-stock">الكمية بالمخزون</label>
+            <input type="number" id="edit-prod-stock" class="form-input" required min="0">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">حفظ التعديلات</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Inventory Movement Modal -->
+  <div class="modal-overlay" id="inventory-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.5rem;">تحديث كمية المخزون</h2>
+        <button onclick="closeInventoryModal()" style="background: none; border: none; font-size: 1.8rem; cursor: pointer;">&times;</button>
+      </div>
+      <form id="inventory-form">
+        <input type="hidden" id="inv-prod-id">
+        <div class="form-group">
+          <label class="form-label">المنتج المحدد</label>
+          <input type="text" id="inv-prod-name" class="form-input" readonly style="background: var(--bg-primary);">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inv-type">نوع الحركة</label>
+          <select id="inv-type" class="form-select" required>
+            <option value="ADD">زيادة الكمية (+)</option>
+            <option value="DEDUCT">خصم الكمية (-)</option>
+            <option value="ADJUSTMENT">تعديل مباشر للكمية الإجمالية (=)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inv-qty">الكمية</label>
+          <input type="number" id="inv-qty" class="form-input" min="0" required placeholder="أدخل عدد القطع">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inv-reason">سبب تعديل المخزون</label>
+          <input type="text" id="inv-reason" class="form-input" required placeholder="مثال: توريد دفعة جديدة، بيع مباشر، جرف تلفيات">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">تسجيل حركة المخزون</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Login / Register Modal -->
   <div class="modal-overlay" id="auth-modal">
@@ -212,6 +343,8 @@
     </div>
   </footer>
 
+  <!-- HTML5 QR Code Barcode Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="./js/auth.js"></script>
   <script src="./js/app.js"></script>
 </body>

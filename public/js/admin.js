@@ -21,6 +21,7 @@ async function verifyAdminAccess() {
 
   loadAdminMetrics();
   loadAdminUsers();
+  loadAdminCategories();
   setupAdminEvents();
 }
 
@@ -95,6 +96,80 @@ async function loadAdminUsers() {
   }
 }
 
+async function loadAdminCategories() {
+  const tbody = document.getElementById('admin-categories-tbody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/categories`);
+    const data = await res.json();
+
+    if (data.success && data.data.categories) {
+      const categories = data.data.categories;
+      if (categories.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-weight: 600;">لا توجد أقسام مسجلة حالياً. قم بإضافة قسم جديد.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = categories.map(c => `
+        <tr>
+          <td><strong>${escapeHtml(c.name)}</strong></td>
+          <td>${escapeHtml(c.description || 'بدون وصف')}</td>
+          <td><span class="badge badge-info">${c._count ? c._count.products : 0} منتجات</span></td>
+          <td>${new Date(c.createdAt).toLocaleDateString('ar-EG')}</td>
+          <td>
+            <button onclick="openEditCategoryModal('${c.id}', '${escapeHtml(c.name)}', '${escapeHtml(c.description || '')}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">✏️ تعديل</button>
+            <button onclick="deleteCategoryAction('${c.id}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239,68,68,0.3); margin-right: 4px;">🗑️ حذف</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; font-weight: 700;">فشل جلب قائمة الأقسام.</td></tr>`;
+  }
+}
+
+window.openCreateCategoryModal = function() {
+  document.getElementById('cat-id').value = '';
+  document.getElementById('cat-name').value = '';
+  document.getElementById('cat-desc').value = '';
+  document.getElementById('cat-modal-title').textContent = 'إضافة قسم جديد';
+  document.getElementById('category-modal').classList.add('active');
+};
+
+window.openEditCategoryModal = function(id, name, description) {
+  document.getElementById('cat-id').value = id;
+  document.getElementById('cat-name').value = name;
+  document.getElementById('cat-desc').value = description;
+  document.getElementById('cat-modal-title').textContent = 'تعديل قسم';
+  document.getElementById('category-modal').classList.add('active');
+};
+
+window.closeCategoryModal = function() {
+  document.getElementById('category-modal').classList.remove('active');
+};
+
+window.deleteCategoryAction = async function(id) {
+  if (!confirm('هل أنت تأكد من حذف هذا القسم؟ سيتم إلغاء ربطه من المنتجات الحالية.')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/categories/${id}`, {
+      method: 'DELETE',
+      headers: Auth.getHeaders()
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert('تم حذف القسم بنجاح.');
+      loadAdminCategories();
+    } else {
+      alert(`تعذر حذف القسم: ${data.message}`);
+    }
+  } catch (err) {
+    alert('حدث خطأ أثناء حذف القسم.');
+  }
+};
+
 async function toggleStatus(userId, currentStatus) {
   const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
   const actionText = newStatus === 'ACTIVE' ? 'تفعيل' : 'تجميد';
@@ -147,7 +222,7 @@ async function promptRoleChange(userId, currentRole) {
   }
 }
 
-// Bind handlers to window object for inline onclick attributes
+// Bind handlers to window object
 window.toggleStatus = toggleStatus;
 window.promptRoleChange = promptRoleChange;
 
@@ -161,6 +236,40 @@ function setupAdminEvents() {
     window.location.href = './index.html';
   });
 
+  // Category form submit
+  const catForm = document.getElementById('category-form');
+  if (catForm) {
+    catForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('cat-id').value;
+      const name = document.getElementById('cat-name').value.trim();
+      const description = document.getElementById('cat-desc').value.trim();
+
+      const method = id ? 'PUT' : 'POST';
+      const endpoint = id ? `${API_BASE}/api/categories/${id}` : `${API_BASE}/api/categories`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method,
+          headers: Auth.getHeaders(),
+          body: JSON.stringify({ name, description })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert('تم حفظ القسم بنجاح!');
+          closeCategoryModal();
+          loadAdminCategories();
+        } else {
+          alert(`خطأ: ${data.message}`);
+        }
+      } catch (err) {
+        alert('فشل حفظ بيانات القسم.');
+      }
+    });
+  }
+
   const adminNav = document.querySelector('.admin-nav');
   if (adminNav) {
     adminNav.addEventListener('click', (e) => {
@@ -173,20 +282,12 @@ function setupAdminEvents() {
 
       const target = btn.getAttribute('data-admin-tab');
       const usersTab = document.getElementById('admin-tab-users');
+      const categoriesTab = document.getElementById('admin-tab-categories');
       const systemTab = document.getElementById('admin-tab-system');
 
       if (usersTab) usersTab.style.display = target === 'users' ? 'block' : 'none';
+      if (categoriesTab) categoriesTab.style.display = target === 'categories' ? 'block' : 'none';
       if (systemTab) systemTab.style.display = target === 'system' ? 'block' : 'none';
     });
   }
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }

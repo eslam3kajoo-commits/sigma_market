@@ -21,6 +21,7 @@ export const updateProductSchema = z.object({
     name: z.string().min(2).optional(),
     description: z.string().min(5).optional(),
     price: z.number().positive().optional(),
+    barcode: z.string().min(3).optional(),
     stock: z.number().int().nonnegative().optional(),
     status: z.enum(['AVAILABLE', 'OUT_OF_STOCK', 'DISCONTINUED']).optional(),
     categoryId: z.string().optional(),
@@ -137,13 +138,33 @@ export const createProduct = async (req: Request, res: Response) => {
       return sendError(res, `Product with barcode '${barcode}' already exists.`, 409);
     }
 
+    // Ensure product is linked to a valid category (no products without Category)
+    let targetCategoryId = categoryId;
+    if (targetCategoryId) {
+      const catExists = await prisma.category.findUnique({ where: { id: targetCategoryId } });
+      if (!catExists) {
+        return sendError(res, 'Specified category does not exist.', 404);
+      }
+    } else {
+      let defaultCat = await prisma.category.findFirst({ orderBy: { createdAt: 'asc' } });
+      if (!defaultCat) {
+        defaultCat = await prisma.category.create({
+          data: {
+            name: 'عام',
+            description: 'قسم المنتجات العامة والافتراضية'
+          }
+        });
+      }
+      targetCategoryId = defaultCat.id;
+    }
+
     // Create product with relational Inventory and ExpiryInfo in single transaction
     const parsedExpiryDate = expiryDate ? new Date(expiryDate) : undefined;
 
     const newProduct = await prisma.product.create({
       data: {
         merchantId,
-        categoryId: categoryId || null,
+        categoryId: targetCategoryId,
         name,
         description,
         price,
@@ -184,9 +205,13 @@ export const createProduct = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, price, stock, status, categoryId, expiryDate } = req.body;
+    const { name, description, price, barcode, stock, status, categoryId, expiryDate } = req.body;
 
-    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+      include: { inventory: true }
+    });
+
     if (!existingProduct) {
       return sendError(res, 'Product not found.', 404);
     }
@@ -196,7 +221,33 @@ export const updateProduct = async (req: Request, res: Response) => {
       return sendError(res, 'Forbidden. You can only edit your own store products.', 403);
     }
 
+    // Check barcode uniqueness if barcode is changed
+    if (barcode && barcode !== existingProduct.barcode) {
+      const duplicateBarcode = await prisma.product.findUnique({ where: { barcode } });
+      if (duplicateBarcode) {
+        return sendError(res, `Product with barcode '${barcode}' already exists.`, 409);
+      }
+    }
+
+    // Prevent negative stock
+    if (stock !== undefined && stock < 0) {
+      return sendError(res, 'Stock quantity cannot be negative.', 400);
+    }
+
+    // Verify category if provided
+    if (categoryId) {
+      const catExists = await prisma.category.findUnique({ where: { id: categoryId } });
+      if (!catExists) {
+        return sendError(res, 'Specified category does not exist.', 404);
+      }
+    }
+
     const parsedExpiryDate = expiryDate ? new Date(expiryDate) : undefined;
+
+    let updatedStatus = status;
+    if (!updatedStatus && stock !== undefined) {
+      updatedStatus = stock > 0 ? 'AVAILABLE' : 'OUT_OF_STOCK';
+    }
 
     const updatedProduct = await prisma.product.update({
       where: { id },
@@ -204,8 +255,9 @@ export const updateProduct = async (req: Request, res: Response) => {
         ...(name ? { name } : {}),
         ...(description ? { description } : {}),
         ...(price ? { price } : {}),
+        ...(barcode ? { barcode } : {}),
         ...(stock !== undefined ? { stock } : {}),
-        ...(status ? { status } : {}),
+        ...(updatedStatus ? { status: updatedStatus } : {}),
         ...(categoryId !== undefined ? { categoryId } : {}),
         ...(parsedExpiryDate ? { expiryDate: parsedExpiryDate } : {})
       },

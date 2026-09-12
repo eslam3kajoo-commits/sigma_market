@@ -32,7 +32,7 @@
   </header>
 
   <main class="container" style="padding-top: 40px;">
-    <!-- Access Denied Card (Visible if non-admin) -->
+    <!-- Access Denied Card -->
     <div id="admin-unauthorized-card" class="card" style="display: none; max-width: 600px; margin: 40px auto; text-align: center;">
       <h2 style="color: #ef4444; margin-bottom: 12px; font-size: 1.6rem;">🚫 تم رفض الوصول</h2>
       <p style="color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">
@@ -41,12 +41,12 @@
       <a href="./index.html" class="btn btn-primary">العودة للبوابة وتسجيل الدخول كأدمن</a>
     </div>
 
-    <!-- Admin Panel Body (Visible to Admin) -->
+    <!-- Admin Panel Body -->
     <div id="admin-panel-body" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 style="font-size: 2.2rem; font-weight: 900;">لوحة تحكم مدير النظام</h1>
-          <p style="color: var(--text-muted); font-weight: 500;">مراقبة بيانات المنصة بالوقت الفعلي، إدارة حسابات المستخدمين ومتابعة صحة النظام.</p>
+          <p style="color: var(--text-muted); font-weight: 500;">مراقبة بيانات المنصة بالوقت الفعلي، إدارة الأقسام والمنتجات وتتبع حركة المخزون.</p>
         </div>
         <span class="badge badge-success" id="admin-status-indicator">جلسة المسؤول نشطة</span>
       </div>
@@ -83,6 +83,7 @@
       <!-- Admin Section Tabs -->
       <div class="admin-nav">
         <button class="admin-nav-btn active" data-admin-tab="users">إدارة حسابات المستخدمين</button>
+        <button class="admin-nav-btn" data-admin-tab="categories">إدارة الأقسام (Categories)</button>
         <button class="admin-nav-btn" data-admin-tab="system">نظرة عامة على النظام والوحدات</button>
       </div>
 
@@ -123,19 +124,49 @@
         </div>
       </div>
 
-      <!-- Tab 2: System Overview & Placeholder Modules -->
+      <!-- Tab 2: Categories Management -->
+      <div id="admin-tab-categories" style="display: none;">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h2 style="font-size: 1.4rem;">إدارة أقسام المنتجات (Categories)</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">إضافة، تعديل، وحذف الأقسام لربط كافة المنتجات بأقسامها الهيكلية الصحيحة.</p>
+            </div>
+            <button onclick="openCreateCategoryModal()" class="btn btn-primary">+ إضافة قسم جديد</button>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم القسم</th>
+                  <th>الوصف</th>
+                  <th>عدد المنتجات المرتبطة</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-categories-tbody">
+                <tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-weight: 600;">جاري تحميل الأقسام...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: System Overview -->
       <div id="admin-tab-system" style="display: none;">
         <div class="card">
           <h2 style="margin-bottom: 12px; font-size: 1.4rem;">مراقبة تكامل الوحدات البرمجية</h2>
           <p style="color: var(--text-muted); margin-bottom: 24px;">
-            10 وحدات وظيفية نموذجية يتم مراقبتها بواسطة تشخيصات النظام الذكي.
+            الوحدات الوظيفية المفعلة والمراقبة بواسطة التشخيصات الذكية.
           </p>
 
           <div class="dashboard-grid">
             <div class="card" style="background: var(--bg-surface-elevated);">
               <h3 style="font-size: 1.1rem; color: var(--primary);">وحدة المنتجات والمخزون</h3>
-              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">سجل الباركود ومراقبة حركة المخزون.</p>
-              <span class="badge badge-success" style="margin-top: 12px;">نشط ومفعل</span>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">سجل الباركود، الأقسام ومراقبة حركة المخزون.</p>
+              <span class="badge badge-success" style="margin-top: 12px;">نشط ومفعل بالكامل (Completed)</span>
             </div>
             <div class="card" style="background: var(--bg-surface-elevated);">
               <h3 style="font-size: 1.1rem; color: var(--primary);">إدارة الصلاحية والضمان</h3>
@@ -157,6 +188,29 @@
       </div>
     </div>
   </main>
+
+  <!-- Create/Edit Category Modal -->
+  <div class="modal-overlay" id="category-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 id="cat-modal-title" style="font-size: 1.5rem;">إضافة قسم جديد</h2>
+        <button onclick="closeCategoryModal()" style="background: none; border: none; font-size: 1.8rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="category-form">
+        <input type="hidden" id="cat-id">
+        <div class="form-group">
+          <label class="form-label" for="cat-name">اسم القسم</label>
+          <input type="text" id="cat-name" class="form-input" required placeholder="مثال: أجهزة إلكترونية طازجة">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cat-desc">الوصف</label>
+          <input type="text" id="cat-desc" class="form-input" placeholder="وصف قصير للقسم">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">حفظ القسم</button>
+      </form>
+    </div>
+  </div>
 
   <script src="./js/auth.js"></script>
   <script src="./js/admin.js"></script>

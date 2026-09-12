@@ -22,6 +22,7 @@ import predictionsRoutes from './modules/prediction-ai/predictions.routes';
 import donationsRoutes from './modules/donations/donations.routes';
 import notificationsRoutes from './modules/notifications-analytics/notifications.routes';
 import warrantyRoutes from './modules/warranties/warranty.routes';
+import categoriesRoutes from './modules/products/categories.routes';
 import { paymentsRouter, payoutsRouter, deliveriesRouter } from './modules/payments/financial.routes';
 
 const app = express();
@@ -66,6 +67,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/categories', categoriesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/warranties', warrantyRoutes);
 app.use('/api/payments', paymentsRouter);
