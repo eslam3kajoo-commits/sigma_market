@@ -6,7 +6,7 @@ import { sendSuccess, sendError } from '../../utils/response';
 export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(2, 'Product name is required'),
-    description: z.string().min(5, 'Description must be at least 5 characters'),
+    description: z.string().optional().default(''),
     price: z.number().positive('Price must be greater than 0'),
     barcode: z.string().min(3, 'Barcode is required'),
     stock: z.number().int().nonnegative().default(0),
@@ -19,7 +19,7 @@ export const createProductSchema = z.object({
 export const updateProductSchema = z.object({
   body: z.object({
     name: z.string().min(2).optional(),
-    description: z.string().min(5).optional(),
+    description: z.string().optional(),
     price: z.number().positive().optional(),
     barcode: z.string().min(3).optional(),
     stock: z.number().int().nonnegative().optional(),
@@ -166,7 +166,7 @@ export const createProduct = async (req: Request, res: Response) => {
         merchantId,
         categoryId: targetCategoryId,
         name,
-        description,
+        description: description || name || 'منتج سيجما ماركت',
         price,
         barcode,
         stock,

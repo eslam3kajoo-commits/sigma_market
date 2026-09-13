@@ -424,10 +424,12 @@ async function triggerBarcodeAutoLookup(barcode, sourceId) {
       if (data.success && data.data.product) {
         const p = data.data.product;
         document.getElementById('prod-name').value = p.name || '';
-        document.getElementById('prod-desc').value = p.description || '';
+        const descEl = document.getElementById('prod-desc');
+        if (descEl) descEl.value = p.description || '';
         document.getElementById('prod-price').value = p.price || '';
         document.getElementById('prod-stock').value = p.stock || '';
-        if (p.categoryId) document.getElementById('prod-category').value = p.categoryId;
+        const catEl = document.getElementById('prod-category');
+        if (catEl && p.categoryId) catEl.value = p.categoryId;
         if (p.expiryDate) document.getElementById('prod-expiry').value = p.expiryDate.split('T')[0];
 
         statusNotice.innerHTML = `<span style="color: #059669;">✔ تم العثور على المنتج: "${escapeHtml(p.name)}". تم تعبئة البيانات تلقائياً.</span>`;
@@ -651,8 +653,10 @@ function setupForms() {
       e.preventDefault();
 
       const name = document.getElementById('prod-name').value;
-      const description = document.getElementById('prod-desc').value;
-      const categoryId = document.getElementById('prod-category').value;
+      const descEl = document.getElementById('prod-desc');
+      const description = descEl ? descEl.value : name;
+      const catEl = document.getElementById('prod-category');
+      const categoryId = (catEl && catEl.value) ? catEl.value : undefined;
       const price = parseFloat(document.getElementById('prod-price').value);
       const stock = parseInt(document.getElementById('prod-stock').value, 10);
       const barcode = document.getElementById('prod-barcode').value;
@@ -662,7 +666,7 @@ function setupForms() {
         const res = await fetch(`${API_BASE}/api/products`, {
           method: 'POST',
           headers: Auth.getHeaders(),
-          body: JSON.stringify({ name, description, categoryId: categoryId || undefined, price, stock, barcode, expiryDate: expiryDate || undefined })
+          body: JSON.stringify({ name, description, categoryId, price, stock, barcode, expiryDate: expiryDate || undefined })
         });
 
         const data = await res.json();
@@ -690,8 +694,10 @@ function setupForms() {
 
       const id = document.getElementById('edit-prod-id').value;
       const name = document.getElementById('edit-prod-name').value;
-      const description = document.getElementById('edit-prod-desc').value;
-      const categoryId = document.getElementById('edit-prod-category').value;
+      const descEl = document.getElementById('edit-prod-desc');
+      const description = descEl ? descEl.value : name;
+      const catEl = document.getElementById('edit-prod-category');
+      const categoryId = (catEl && catEl.value) ? catEl.value : undefined;
       const price = parseFloat(document.getElementById('edit-prod-price').value);
       const stock = parseInt(document.getElementById('edit-prod-stock').value, 10);
       const barcode = document.getElementById('edit-prod-barcode').value;
@@ -760,11 +766,13 @@ window.openEditProductModal = async function(id) {
       const p = data.data.product;
       document.getElementById('edit-prod-id').value = p.id;
       document.getElementById('edit-prod-name').value = p.name;
-      document.getElementById('edit-prod-desc').value = p.description;
+      const descEl = document.getElementById('edit-prod-desc');
+      if (descEl) descEl.value = p.description || '';
       document.getElementById('edit-prod-price').value = p.price;
       document.getElementById('edit-prod-stock').value = p.stock;
       document.getElementById('edit-prod-barcode').value = p.barcode;
-      if (p.categoryId) document.getElementById('edit-prod-category').value = p.categoryId;
+      const catEl = document.getElementById('edit-prod-category');
+      if (catEl && p.categoryId) catEl.value = p.categoryId;
 
       document.getElementById('edit-product-modal').classList.add('active');
     }
