@@ -336,7 +336,7 @@ window.startCameraScanner = async function(targetInputId) {
         closeCameraScannerModal();
       }
     } catch (e) {
-      alert('تعذر فتح الكاميرا. يرجى إعطاء الإذن للمتصفح لاستخدام الكاميرا.');
+      alert('تعذر فتح الكاميرا: قد لا توجد كاميرا متصلة بهذا الجهاز (مثل اللابتوب/الكمبيوتر الشخصي) أو لم يتم السماح بالإذن. يمكنك استخدام جهاز الباركود الخارجي (USB).');
       closeCameraScannerModal();
     }
   }
@@ -678,7 +678,8 @@ function setupForms() {
           loadProducts();
           document.querySelector('[data-tab="catalog"]').click();
         } else {
-          alert(`فشلت العملية: ${data.message}`);
+          const detail = data.error ? `\n\nالتفاصيل: ${typeof data.error === 'string' ? data.error : JSON.stringify(data.error)}` : '';
+          alert(`فشلت العملية: ${data.message}${detail}`);
         }
       } catch (err) {
         alert('حدث خطأ أثناء إضافة المنتج.');
