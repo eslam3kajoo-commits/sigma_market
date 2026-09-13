@@ -98,8 +98,12 @@
     <div id="tab-catalog" class="tab-content">
       <!-- Filter Bar -->
       <div class="filter-bar">
-        <div style="flex: 1; min-width: 200px;">
-          <input type="text" id="catalog-search-input" class="form-input" placeholder="🔍 بحث باسم المنتج أو الباركود...">
+        <div style="flex: 1; min-width: 260px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <input type="text" id="catalog-search-input" class="form-input" placeholder="🔍 بحث باسم المنتج أو الباركود..." style="flex: 1; min-width: 180px;">
+          <button type="button" class="btn btn-primary btn-scan-camera" data-target="catalog-search-input" style="white-space: nowrap; font-weight: 800; display: flex; align-items: center; gap: 6px; padding: 8px 14px;">
+            <span>📷</span>
+            <span>مسح بكاميرا الهاتف</span>
+          </button>
         </div>
         <button id="btn-refresh-catalog" class="btn btn-outline" style="padding: 10px 16px;">تحديث</button>
       </div>
@@ -142,7 +146,7 @@
             <div>
               <div style="font-weight: 800; color: #10b981; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
                 <span>قارئ الباركود الخارجي (USB/BT)</span>
-                <span class="badge badge-success" style="font-size: 0.7rem; padding: 2px 6px;">مُتصل ونشط</span>
+                <span class="badge badge-success" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px;">جاهز ومستعد (Laser/USB) ⚡</span>
               </div>
               <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">جاهز ومستعد للمسح التلقائي المباشر في أي وقت</div>
             </div>

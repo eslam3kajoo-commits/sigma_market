@@ -220,7 +220,7 @@ function setupBarcodeScannerSupport() {
   });
 
   // 2. Hardware Scanner & Input listeners for auto-lookup
-  const barcodeInputIds = ['barcode-input', 'prod-barcode', 'edit-prod-barcode'];
+  const barcodeInputIds = ['barcode-input', 'catalog-search-input', 'prod-barcode', 'edit-prod-barcode'];
   barcodeInputIds.forEach(id => {
     const input = document.getElementById(id);
     if (!input) return;
@@ -275,8 +275,11 @@ function setupBarcodeScannerSupport() {
 
         // Determine target input element depending on active tab
         let targetId = 'barcode-input';
+        const catalogTab = document.getElementById('tab-catalog');
         const createTab = document.getElementById('tab-create-product');
-        if (createTab && createTab.style.display !== 'none') {
+        if (catalogTab && catalogTab.style.display !== 'none') {
+          targetId = 'catalog-search-input';
+        } else if (createTab && createTab.style.display !== 'none') {
           targetId = 'prod-barcode';
         }
 
@@ -380,6 +383,15 @@ function onBarcodeScanned(barcodeText, targetId) {
 
 async function triggerBarcodeAutoLookup(barcode, sourceId) {
   if (!barcode) return;
+
+  if (sourceId === 'catalog-search-input') {
+    const searchInput = document.getElementById('catalog-search-input');
+    if (searchInput) {
+      searchInput.value = barcode;
+    }
+    loadProducts();
+    return;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/api/products/barcode/${encodeURIComponent(barcode)}`);
