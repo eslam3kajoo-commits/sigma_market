@@ -126,6 +126,11 @@ export const createProduct = async (req: Request, res: Response) => {
       return sendError(res, 'Authentication required.', 401);
     }
 
+    const dbUrl = process.env.DATABASE_URL || '';
+    if (!dbUrl.startsWith('postgres://') && !dbUrl.startsWith('postgresql://')) {
+      return sendError(res, 'لم يتم ربط قاعدة بيانات PostgreSQL على Vercel بعد. يرجى إضافة متغير البيئة DATABASE_URL المأخوذ من Neon Console في إعدادات Vercel.', 400);
+    }
+
     const { name, description, price, barcode, stock, categoryId, expiryDate, alertDaysBefore } = req.body;
     const merchantId = req.user.userId;
 
