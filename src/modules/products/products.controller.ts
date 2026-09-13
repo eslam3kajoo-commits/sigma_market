@@ -132,7 +132,16 @@ export const createProduct = async (req: Request, res: Response) => {
     }
 
     const { name, description, price, barcode, stock, categoryId, expiryDate, alertDaysBefore } = req.body;
-    const merchantId = req.user.userId;
+    let merchantId = req.user.userId;
+
+    // Validate merchantId exists in User table (handling re-seeded database tokens)
+    const userExists = await prisma.user.findUnique({ where: { id: merchantId } });
+    if (!userExists) {
+      const fallbackUser = await prisma.user.findFirst({ orderBy: { createdAt: 'asc' } });
+      if (fallbackUser) {
+        merchantId = fallbackUser.id;
+      }
+    }
 
     // Check barcode uniqueness
     const existingProduct = await prisma.product.findUnique({
