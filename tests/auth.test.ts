@@ -108,4 +108,50 @@ describe('Smart Warranty Platform - Authentication API Suite', () => {
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
   });
+
+  it('8. Should allow authenticated user to update their profile', async () => {
+    const meRes = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    const userId = meRes.body.data.user.id;
+
+    const res = await request(app)
+      .put(`/api/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ fullName: 'Updated Test Name', phoneNumber: '0599999999' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.user.fullName).toBe('Updated Test Name');
+  });
+
+  it('9. Should allow authenticated user to change password', async () => {
+    const meRes = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    const userId = meRes.body.data.user.id;
+
+    const res = await request(app)
+      .put(`/api/users/${userId}/password`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ currentPassword: testUser.password, newPassword: 'NewPassword123!' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it('10. Should authenticate user with new password after change', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: testUser.email,
+        password: 'NewPassword123!'
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.token).toBeDefined();
+  });
 });

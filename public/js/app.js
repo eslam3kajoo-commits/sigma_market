@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup Event Listeners
   setupTabNavigation();
   setupAuthModal();
+  setupProfileAndAccountForms();
+  setupAddressHandlers();
   setupForms();
   setupMetricCardsInteractivity();
   setupCatalogFilters();
@@ -172,6 +174,15 @@ function debounce(func, wait) {
 
 function setupTabNavigation() {
   const container = document.querySelector('.tab-container');
+  const userPill = document.getElementById('user-pill');
+
+  if (userPill) {
+    userPill.addEventListener('click', () => {
+      const profileBtn = document.getElementById('tab-profile-btn');
+      if (profileBtn) profileBtn.click();
+    });
+  }
+
   if (!container) return;
 
   container.addEventListener('click', (e) => {
@@ -201,6 +212,10 @@ function setupTabNavigation() {
       loadProducts();
     } else if (targetTab === 'roles') {
       loadRoles();
+    } else if (targetTab === 'profile') {
+      loadUserProfile();
+    } else if (targetTab === 'addresses') {
+      loadUserAddresses();
     }
   });
 }
@@ -581,71 +596,593 @@ function setupAuthModal() {
   const btnClose = document.getElementById('modal-close');
   const btnLogout = document.getElementById('btn-logout');
   const toggleBtn = document.getElementById('auth-toggle-btn');
+  const alertEl = document.getElementById('auth-alert');
 
   let isRegistering = false;
 
-  btnOpen.addEventListener('click', () => modal.classList.add('active'));
-  btnClose.addEventListener('click', () => modal.classList.remove('active'));
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.remove('active');
-  });
-
-  btnLogout.addEventListener('click', async () => {
-    await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: Auth.getHeaders() });
-    Auth.clearSession();
-    loadCategories();
-    loadProducts();
-  });
-
-  toggleBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    isRegistering = !isRegistering;
-    document.getElementById('modal-title').textContent = isRegistering ? 'إنشاء حساب جديد' : 'تسجيل الدخول';
-    document.getElementById('auth-submit-btn').textContent = isRegistering ? 'إنشاء الحساب' : 'تسجيل الدخول';
-    document.getElementById('group-fullname').style.display = isRegistering ? 'block' : 'none';
-    document.getElementById('group-role').style.display = isRegistering ? 'block' : 'none';
-    document.getElementById('auth-toggle-text').textContent = isRegistering ? 'لديك حساب بالفعل؟' : "ليس لديك حساب؟";
-    toggleBtn.textContent = isRegistering ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
-  });
-
-  document.getElementById('auth-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
-    const fullName = document.getElementById('auth-fullname').value;
-    const roleName = document.getElementById('auth-role').value;
-
-    const endpoint = isRegistering ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
-    const payload = isRegistering
-      ? { email, password, fullName, roleName }
-      : { email, password };
-
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        Auth.setSession(data.data.token, data.data.user);
-        modal.classList.remove('active');
-        loadCategories();
-        loadProducts();
-        const userRoleAr = ROLE_MAP[data.data.user.role] || data.data.user.role;
-        alert(`مرحباً بك، ${data.data.user.fullName || data.data.user.email}! تم تفعيل الحساب كـ (${userRoleAr}).`);
-      } else {
-        alert(`خطأ في عملية المصادقة: ${data.message || 'بيانات الدخول غير صحيحة'}`);
-      }
-    } catch (err) {
-      alert('فشلت عملية طلب المصادقة.');
+  const resetAuthAlert = () => {
+    if (alertEl) {
+      alertEl.style.display = 'none';
+      alertEl.textContent = '';
+      alertEl.style.background = '';
+      alertEl.style.color = '';
+      alertEl.style.border = '';
     }
-  });
+  };
+
+  const showAuthError = (msg) => {
+    if (alertEl) {
+      alertEl.style.display = 'block';
+      alertEl.style.background = '#fef2f2';
+      alertEl.style.color = '#dc2626';
+      alertEl.style.border = '1px solid #fca5a5';
+      alertEl.textContent = msg;
+    } else {
+      alert(msg);
+    }
+  };
+
+  if (btnOpen) btnOpen.addEventListener('click', () => { resetAuthAlert(); modal.classList.add('active'); });
+  if (btnClose) btnClose.addEventListener('click', () => { resetAuthAlert(); modal.classList.remove('active'); });
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) { resetAuthAlert(); modal.classList.remove('active'); }
+    });
+  }
+
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: Auth.getHeaders() });
+      Auth.clearSession();
+      loadCategories();
+      loadProducts();
+    });
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetAuthAlert();
+      isRegistering = !isRegistering;
+      document.getElementById('modal-title').textContent = isRegistering ? 'إنشاء حساب جديد' : 'تسجيل الدخول';
+      document.getElementById('auth-submit-btn').textContent = isRegistering ? 'إنشاء الحساب' : 'تسجيل الدخول';
+
+      const groupFullName = document.getElementById('group-fullname');
+      const groupPhone = document.getElementById('group-phone');
+      const groupConfirmPass = document.getElementById('group-confirm-password');
+      const groupRole = document.getElementById('group-role');
+      const groupRememberMe = document.getElementById('group-remember-me');
+
+      if (groupFullName) groupFullName.style.display = isRegistering ? 'block' : 'none';
+      if (groupPhone) groupPhone.style.display = isRegistering ? 'block' : 'none';
+      if (groupConfirmPass) groupConfirmPass.style.display = isRegistering ? 'block' : 'none';
+      if (groupRole) groupRole.style.display = isRegistering ? 'block' : 'none';
+      if (groupRememberMe) groupRememberMe.style.display = isRegistering ? 'none' : 'flex';
+
+      document.getElementById('auth-toggle-text').textContent = isRegistering ? 'لديك حساب بالفعل؟' : "ليس لديك حساب؟";
+      toggleBtn.textContent = isRegistering ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
+    });
+  }
+
+  const authForm = document.getElementById('auth-form');
+  if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resetAuthAlert();
+
+      const emailEl = document.getElementById('auth-email');
+      const passwordEl = document.getElementById('auth-password');
+      const submitBtn = document.getElementById('auth-submit-btn');
+
+      const email = emailEl ? emailEl.value.trim() : '';
+      const password = passwordEl ? passwordEl.value : '';
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        return showAuthError('يرجى إدخال بريد إلكتروني صحيح.');
+      }
+
+      if (!password) {
+        return showAuthError('يرجى إدخال كلمة المرور.');
+      }
+
+      let payload = { email, password };
+
+      if (isRegistering) {
+        const fullNameEl = document.getElementById('auth-fullname');
+        const phoneEl = document.getElementById('auth-phone');
+        const confirmPassEl = document.getElementById('auth-confirm-password');
+        const roleEl = document.getElementById('auth-role');
+
+        const fullName = fullNameEl ? fullNameEl.value.trim() : '';
+        const phoneNumber = phoneEl ? phoneEl.value.trim() : '';
+        const confirmPassword = confirmPassEl ? confirmPassEl.value : '';
+        const roleName = roleEl ? roleEl.value : 'Customer';
+
+        if (!fullName || fullName.length < 2) {
+          return showAuthError('الاسم الكامل يجب أن يتكون من حرفين على الأقل.');
+        }
+
+        if (password.length < 8) {
+          return showAuthError('كلمة المرور يجب أن تتكون من 8 أحرف على الأقل.');
+        }
+
+        if (password !== confirmPassword) {
+          return showAuthError('كلمة المرور وتأكيد كلمة المرور غير متطابقين.');
+        }
+
+        payload = { email, password, fullName, roleName, ...(phoneNumber ? { phoneNumber } : {}) };
+      }
+
+      const endpoint = isRegistering ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
+
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'جاري المعالجة...';
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          Auth.setSession(data.data.token, data.data.user);
+          modal.classList.remove('active');
+          authForm.reset();
+          loadCategories();
+          loadProducts();
+
+          const activeTabBtn = document.querySelector('.tab-btn.active');
+          if (activeTabBtn) {
+            const activeTab = activeTabBtn.getAttribute('data-tab');
+            if (activeTab === 'profile') loadUserProfile();
+            if (activeTab === 'addresses') loadUserAddresses();
+          }
+        } else {
+          showAuthError(data.message || 'بيانات المصادقة غير صحيحة.');
+        }
+      } catch (err) {
+        showAuthError('حدث خطأ في الاتصال بالخادم. يرجى المحاولة لاحقاً.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+  }
 }
+
+async function loadUserProfile() {
+  if (!Auth.token || !Auth.user) {
+    Auth.handleApiUnauthorized();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/me`, { headers: Auth.getHeaders() });
+    const data = await res.json();
+
+    if (res.status === 401) {
+      Auth.handleApiUnauthorized();
+      return;
+    }
+
+    if (data.success && data.data.user) {
+      const user = data.data.user;
+      const nameEl = document.getElementById('profile-display-name');
+      const emailEl = document.getElementById('profile-display-email');
+      const phoneEl = document.getElementById('profile-display-phone');
+      const dateEl = document.getElementById('profile-display-date');
+      const roleBadge = document.getElementById('profile-role-badge');
+
+      if (nameEl) nameEl.textContent = user.fullName || user.email;
+      if (emailEl) emailEl.textContent = user.email;
+      if (phoneEl) phoneEl.textContent = user.phoneNumber || 'غير محدد';
+      if (dateEl) dateEl.textContent = new Date(user.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+      if (roleBadge) roleBadge.textContent = ROLE_MAP[user.role] || user.role;
+
+      const inputName = document.getElementById('edit-profile-name');
+      const inputPhone = document.getElementById('edit-profile-phone');
+      if (inputName) inputName.value = user.fullName || '';
+      if (inputPhone) inputPhone.value = user.phoneNumber || '';
+    }
+  } catch (err) {
+    console.error('Failed to load user profile:', err);
+  }
+}
+
+function setupProfileAndAccountForms() {
+  const profileEditForm = document.getElementById('profile-edit-form');
+  if (profileEditForm) {
+    profileEditForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('profile-edit-alert');
+      const submitBtn = document.getElementById('btn-save-profile');
+
+      const fullName = document.getElementById('edit-profile-name').value.trim();
+      const phoneNumber = document.getElementById('edit-profile-phone').value.trim();
+
+      if (!fullName || fullName.length < 2) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'الاسم الكامل يجب أن يتكون من حرفين على الأقل.';
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري الحفظ...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/users/${Auth.user.id}`, {
+          method: 'PUT',
+          headers: Auth.getHeaders(),
+          body: JSON.stringify({ fullName, phoneNumber: phoneNumber || null })
+        });
+
+        if (res.status === 401) {
+          Auth.handleApiUnauthorized();
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          if (alertEl) {
+            alertEl.style.display = 'block';
+            alertEl.style.background = '#ecfdf5';
+            alertEl.style.color = '#059669';
+            alertEl.style.border = '1px solid #a7f3d0';
+            alertEl.textContent = 'تم تحديث البيانات الشخصية بنجاح.';
+          }
+          Auth.user.fullName = fullName;
+          localStorage.setItem('swp_user', JSON.stringify(Auth.user));
+          Auth.updateUI();
+          loadUserProfile();
+        } else {
+          if (alertEl) {
+            alertEl.style.display = 'block';
+            alertEl.style.background = '#fef2f2';
+            alertEl.style.color = '#dc2626';
+            alertEl.style.border = '1px solid #fca5a5';
+            alertEl.textContent = data.message || 'فشل تحديث البيانات.';
+          }
+        }
+      } catch (err) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'حدث خطأ في الاتصال بالخادم.';
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'حفظ التعديلات';
+      }
+    });
+  }
+
+  const changePassForm = document.getElementById('change-password-form');
+  if (changePassForm) {
+    changePassForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('password-change-alert');
+      const submitBtn = document.getElementById('btn-change-pass');
+
+      const currentPassword = document.getElementById('change-current-pass').value;
+      const newPassword = document.getElementById('change-new-pass').value;
+      const confirmPassword = document.getElementById('change-confirm-pass').value;
+
+      if (!currentPassword) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'يرجى إدخال كلمة المرور الحالية.';
+        }
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل.';
+        }
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'كلمة المرور الجديدة وتأكيدها غير متطابقين.';
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري التحديث...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/users/${Auth.user.id}/password`, {
+          method: 'PUT',
+          headers: Auth.getHeaders(),
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        if (res.status === 401) {
+          Auth.handleApiUnauthorized();
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          if (alertEl) {
+            alertEl.style.display = 'block';
+            alertEl.style.background = '#ecfdf5';
+            alertEl.style.color = '#059669';
+            alertEl.style.border = '1px solid #a7f3d0';
+            alertEl.textContent = 'تم تغيير كلمة المرور بنجاح.';
+          }
+          changePassForm.reset();
+        } else {
+          if (alertEl) {
+            alertEl.style.display = 'block';
+            alertEl.style.background = '#fef2f2';
+            alertEl.style.color = '#dc2626';
+            alertEl.style.border = '1px solid #fca5a5';
+            alertEl.textContent = data.message || 'فشل تغيير كلمة المرور.';
+          }
+        }
+      } catch (err) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'تحديث كلمة المرور';
+      }
+    });
+  }
+
+  const profileLogoutBtn = document.getElementById('btn-profile-logout');
+  if (profileLogoutBtn) {
+    profileLogoutBtn.addEventListener('click', async () => {
+      await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: Auth.getHeaders() });
+      Auth.clearSession();
+      loadCategories();
+      loadProducts();
+    });
+  }
+}
+
+let globalUserAddresses = [];
+
+async function loadUserAddresses() {
+  if (!Auth.token || !Auth.user) {
+    Auth.handleApiUnauthorized();
+    return;
+  }
+
+  const container = document.getElementById('addresses-list-container');
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/users/addresses`, { headers: Auth.getHeaders() });
+
+    if (res.status === 401) {
+      Auth.handleApiUnauthorized();
+      return;
+    }
+
+    const data = await res.json();
+
+    if (data.success && data.data.addresses) {
+      globalUserAddresses = data.data.addresses;
+
+      if (globalUserAddresses.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px; font-weight: 600; border: 1px dashed var(--border-color); border-radius: 12px;">
+            لا توجد عناوين شحن مسجلة. قم بإضافة عنوانك الأول لتسهيل عملية التوصيل.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = globalUserAddresses.map(addr => `
+        <div class="card" style="position: relative; display: flex; flex-direction: column; justify-content: space-between; border-color: ${addr.isDefault ? 'var(--primary)' : 'var(--border-color)'};">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px;">
+              <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">${escapeHtml(addr.street)}</div>
+              ${addr.isDefault ? '<span class="badge badge-success">العنوان الافتراضي</span>' : ''}
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 6px;">${escapeHtml(addr.city)}، ${escapeHtml(addr.state)}</div>
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px;">الرمز البريدي: ${escapeHtml(addr.postalCode)} | ${escapeHtml(addr.country)}</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px;">
+            ${!addr.isDefault ? `<button type="button" onclick="setDefaultAddressAction('${addr.id}')" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; flex: 1;">تعيين كافتراضي</button>` : ''}
+            <button type="button" onclick="openEditAddressModal('${addr.id}')" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">تعديل</button>
+            <button type="button" onclick="deleteAddressAction('${addr.id}')" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">حذف</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    if (container) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 20px;">تعذر جلب عناوين الشحن.</div>`;
+    }
+  }
+}
+
+function setupAddressHandlers() {
+  const openAddBtn = document.getElementById('btn-open-add-address');
+  const modal = document.getElementById('address-modal');
+  const closeBtn = document.getElementById('address-modal-close');
+  const form = document.getElementById('address-form');
+  const alertEl = document.getElementById('address-form-alert');
+
+  if (openAddBtn) {
+    openAddBtn.addEventListener('click', () => {
+      if (form) form.reset();
+      document.getElementById('addr-id').value = '';
+      document.getElementById('address-modal-title').textContent = 'إضافة عنوان جديد';
+      if (alertEl) alertEl.style.display = 'none';
+      if (modal) modal.classList.add('active');
+    });
+  }
+
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('addr-id').value;
+      const street = document.getElementById('addr-street').value.trim();
+      const city = document.getElementById('addr-city').value.trim();
+      const state = document.getElementById('addr-state').value.trim();
+      const postalCode = document.getElementById('addr-postal').value.trim();
+      const country = document.getElementById('addr-country').value.trim() || 'Saudi Arabia';
+      const isDefault = document.getElementById('addr-is-default').checked;
+
+      const submitBtn = document.getElementById('btn-save-address');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري الحفظ...';
+
+      const endpoint = id ? `${API_BASE}/api/users/addresses/${id}` : `${API_BASE}/api/users/addresses`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(endpoint, {
+          method,
+          headers: Auth.getHeaders(),
+          body: JSON.stringify({ street, city, state, postalCode, country, isDefault })
+        });
+
+        if (res.status === 401) {
+          Auth.handleApiUnauthorized();
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          if (modal) modal.classList.remove('active');
+          form.reset();
+          loadUserAddresses();
+        } else {
+          if (alertEl) {
+            alertEl.style.display = 'block';
+            alertEl.style.background = '#fef2f2';
+            alertEl.style.color = '#dc2626';
+            alertEl.style.border = '1px solid #fca5a5';
+            alertEl.textContent = data.message || 'فشل حفظ العنوان.';
+          }
+        }
+      } catch (err) {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = '#fef2f2';
+          alertEl.style.color = '#dc2626';
+          alertEl.style.border = '1px solid #fca5a5';
+          alertEl.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'حفظ العنوان';
+      }
+    });
+  }
+}
+
+window.openEditAddressModal = function(id) {
+  const addr = globalUserAddresses.find(a => a.id === id);
+  if (!addr) return;
+
+  document.getElementById('addr-id').value = addr.id;
+  document.getElementById('addr-street').value = addr.street || '';
+  document.getElementById('addr-city').value = addr.city || '';
+  document.getElementById('addr-state').value = addr.state || '';
+  document.getElementById('addr-postal').value = addr.postalCode || '';
+  document.getElementById('addr-country').value = addr.country || 'Saudi Arabia';
+  document.getElementById('addr-is-default').checked = !!addr.isDefault;
+
+  document.getElementById('address-modal-title').textContent = 'تعديل العنوان';
+  const alertEl = document.getElementById('address-form-alert');
+  if (alertEl) alertEl.style.display = 'none';
+
+  const modal = document.getElementById('address-modal');
+  if (modal) modal.classList.add('active');
+};
+
+window.setDefaultAddressAction = async function(id) {
+  try {
+    const res = await fetch(`${API_BASE}/api/users/addresses/${id}/default`, {
+      method: 'PATCH',
+      headers: Auth.getHeaders()
+    });
+
+    if (res.status === 401) {
+      Auth.handleApiUnauthorized();
+      return;
+    }
+
+    const data = await res.json();
+    if (data.success) {
+      loadUserAddresses();
+    } else {
+      alert(data.message || 'فشل تعيين العنوان الافتراضي.');
+    }
+  } catch (err) {
+    alert('حدث خطأ في الاتصال بالخادم.');
+  }
+};
+
+window.deleteAddressAction = async function(id) {
+  if (!confirm('هل أنت متأكد من رغبتك في حذف هذا العنوان؟')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/users/addresses/${id}`, {
+      method: 'DELETE',
+      headers: Auth.getHeaders()
+    });
+
+    if (res.status === 401) {
+      Auth.handleApiUnauthorized();
+      return;
+    }
+
+    const data = await res.json();
+    if (data.success) {
+      loadUserAddresses();
+    } else {
+      alert(data.message || 'فشل حذف العنوان.');
+    }
+  } catch (err) {
+    alert('حدث خطأ في الاتصال بالخادم.');
+  }
+};
 
 function setupForms() {
   // Barcode Lookup Form

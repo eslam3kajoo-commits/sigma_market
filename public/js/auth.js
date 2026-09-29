@@ -49,7 +49,8 @@ const Auth = {
     const statRoleBadge = document.getElementById('stat-role-badge');
     const statRoleDesc = document.getElementById('stat-role-desc');
     const tabCreateProductBtn = document.getElementById('tab-create-product-btn');
-
+    const tabProfileBtn = document.getElementById('tab-profile-btn');
+    const tabAddressesBtn = document.getElementById('tab-addresses-btn');
     const btnAdminPanel = document.getElementById('btn-admin-panel');
 
     if (this.user) {
@@ -68,14 +69,11 @@ const Auth = {
       if (statRoleBadge) statRoleBadge.textContent = 'مسجل وموثوق';
       if (statRoleDesc) statRoleDesc.textContent = `تم الدخول بالبريد الإلكتروني: ${this.user.email}`;
 
-      // Display merchant tab if Merchant or Admin
       if (tabCreateProductBtn) {
-        if (this.user.role === 'Merchant' || this.user.role === 'Admin') {
-          tabCreateProductBtn.style.display = 'inline-block';
-        } else {
-          tabCreateProductBtn.style.display = 'none';
-        }
+        tabCreateProductBtn.style.display = (this.user.role === 'Merchant' || this.user.role === 'Admin') ? 'inline-block' : 'none';
       }
+      if (tabProfileBtn) tabProfileBtn.style.display = 'inline-block';
+      if (tabAddressesBtn) tabAddressesBtn.style.display = 'inline-block';
     } else {
       if (userPill) userPill.style.display = 'none';
       if (btnLoginModal) btnLoginModal.style.display = 'inline-flex';
@@ -84,8 +82,23 @@ const Auth = {
 
       if (statActiveRole) statActiveRole.textContent = 'زائر متصفح';
       if (statRoleBadge) statRoleBadge.textContent = 'زائر';
-      if (statRoleDesc) statRoleDesc.textContent = 'قم بتسجيل الدخول لاختبار صلاحيات الوصول الجدارية';
+      if (statRoleDesc) statRoleDesc.textContent = 'قم بتسجيل الدخول للاستفادة من كامل الميزات';
       if (tabCreateProductBtn) tabCreateProductBtn.style.display = 'none';
+      if (tabProfileBtn) tabProfileBtn.style.display = 'none';
+      if (tabAddressesBtn) tabAddressesBtn.style.display = 'none';
+
+      // If user logs out while on profile or addresses tab, switch to catalog
+      const activeTab = document.querySelector('.tab-btn.active');
+      if (activeTab && (activeTab.getAttribute('data-tab') === 'profile' || activeTab.getAttribute('data-tab') === 'addresses')) {
+        const catalogBtn = document.querySelector('[data-tab="catalog"]');
+        if (catalogBtn) catalogBtn.click();
+      }
     }
+  },
+
+  handleApiUnauthorized() {
+    this.clearSession();
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.classList.add('active');
   }
 };

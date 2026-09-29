@@ -35,9 +35,9 @@
 
       <div class="nav-actions">
         <a id="btn-admin-panel" href="./admin.html" class="btn btn-outline" style="display: none; border-color: var(--primary); color: var(--primary); font-weight: 800;">
-          👑 لوحة تحكم الإدارة
+          لوحة تحكم الإدارة
         </a>
-        <div id="user-pill" style="display: none;" class="badge badge-info">
+        <div id="user-pill" style="display: none; cursor: pointer;" class="badge badge-info" title="عرض الملف الشخصي">
           <span id="user-role-badge">عميل</span> | <span id="user-name">مستخدم</span>
         </div>
         <button id="btn-login-modal" class="btn btn-primary">تسجيل الدخول / حساب جديد</button>
@@ -91,7 +91,9 @@
       <button class="tab-btn active" data-tab="catalog">كتالوج المنتجات والضمان</button>
       <button class="tab-btn" data-tab="roles">نظام الأدوار والصلاحيات (RBAC)</button>
       <button class="tab-btn" data-tab="barcode">فحص الباركود والضمان</button>
-      <button class="tab-btn" data-tab="create-product" id="tab-create-product-btn" style="display: none;">+ إضافة منتج جديد (التاجر)</button>
+      <button class="tab-btn" data-tab="create-product" id="tab-create-product-btn" style="display: none;">إضافة منتج جديد</button>
+      <button class="tab-btn" data-tab="profile" id="tab-profile-btn" style="display: none;">الملف الشخصي والحساب</button>
+      <button class="tab-btn" data-tab="addresses" id="tab-addresses-btn" style="display: none;">عناوين الشحن</button>
     </div>
 
     <!-- Tab 1: Catalog Content -->
@@ -227,6 +229,108 @@
         </form>
       </div>
     </div>
+
+    <!-- Tab 5: Customer Profile & Account Settings -->
+    <div id="tab-profile" class="tab-content" style="display: none;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        
+        <!-- User Info & Edit Profile Card -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            <h2 style="font-size: 1.3rem; font-weight: 800;">الملف الشخصي</h2>
+            <span class="badge badge-info" id="profile-role-badge">عميل</span>
+          </div>
+
+          <div id="profile-view-section" style="margin-bottom: 24px;">
+            <div class="form-group">
+              <label class="form-label" style="color: var(--text-muted); font-size: 0.82rem;">الاسم الكامل</label>
+              <div style="font-weight: 700; font-size: 1.05rem;" id="profile-display-name">-</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="color: var(--text-muted); font-size: 0.82rem;">البريد الإلكتروني</label>
+              <div style="font-weight: 700; font-size: 1.05rem;" id="profile-display-email">-</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="color: var(--text-muted); font-size: 0.82rem;">رقم الهاتف</label>
+              <div style="font-weight: 700; font-size: 1.05rem;" id="profile-display-phone">غير محدد</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="color: var(--text-muted); font-size: 0.82rem;">تاريخ إنشاء الحساب</label>
+              <div style="font-weight: 600; font-size: 0.95rem; color: var(--text-muted);" id="profile-display-date">-</div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 14px;">تعديل البيانات الشخصية</h3>
+            <div id="profile-edit-alert" style="display: none; margin-bottom: 12px; padding: 10px; border-radius: 8px; font-size: 0.88rem;"></div>
+            <form id="profile-edit-form">
+              <div class="form-group">
+                <label class="form-label" for="edit-profile-name">الاسم الكامل</label>
+                <input type="text" id="edit-profile-name" class="form-input" required minlength="2">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="edit-profile-phone">رقم الهاتف</label>
+                <input type="tel" id="edit-profile-phone" class="form-input" placeholder="05XXXXXXXX">
+              </div>
+              <button type="submit" id="btn-save-profile" class="btn btn-primary" style="width: 100%;">حفظ التعديلات</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Account Settings & Security Card -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            <h2 style="font-size: 1.3rem; font-weight: 800;">إعدادات الحساب والأمان</h2>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 14px;">تغيير كلمة المرور</h3>
+            <div id="password-change-alert" style="display: none; margin-bottom: 12px; padding: 10px; border-radius: 8px; font-size: 0.88rem;"></div>
+            <form id="change-password-form">
+              <div class="form-group">
+                <label class="form-label" for="change-current-pass">كلمة المرور الحالية</label>
+                <input type="password" id="change-current-pass" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="change-new-pass">كلمة المرور الجديدة</label>
+                <input type="password" id="change-new-pass" class="form-input" required minlength="8" placeholder="8 أحرف على الأقل">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="change-confirm-pass">تأكيد كلمة المرور الجديدة</label>
+                <input type="password" id="change-confirm-pass" class="form-input" required minlength="8">
+              </div>
+              <button type="submit" id="btn-change-pass" class="btn btn-outline" style="width: 100%; border-color: var(--primary); color: var(--primary);">تحديث كلمة المرور</button>
+            </form>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 20px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: #ef4444;">جلسة العمل</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">إنهاء الجلسة الحالية وتسجيل الخروج بأمان.</p>
+            <button type="button" id="btn-profile-logout" class="btn btn-outline" style="width: 100%; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">تسجيل الخروج</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tab 6: Customer Addresses -->
+    <div id="tab-addresses" class="tab-content" style="display: none;">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+          <div>
+            <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 4px;">عناوين الشحن</h2>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">إدارة عناوين التوصيل والاستلام الخاصة بك</p>
+          </div>
+          <button type="button" id="btn-open-add-address" class="btn btn-primary">إضافة عنوان جديد</button>
+        </div>
+
+        <div id="addresses-alert" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 8px; font-size: 0.9rem;"></div>
+
+        <div id="addresses-list-container" class="dashboard-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+          <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 30px; font-weight: 600;">جاري تحميل العناوين...</div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Camera Scanner Modal -->
@@ -327,20 +431,32 @@
         <button id="modal-close" style="background: none; border: none; color: var(--text-muted); font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
       </div>
 
+      <div id="auth-alert" style="display: none; margin-bottom: 14px; padding: 10px; border-radius: 8px; font-size: 0.88rem;"></div>
+
       <form id="auth-form">
         <div class="form-group" id="group-fullname" style="display: none;">
           <label class="form-label" for="auth-fullname">الاسم الكامل</label>
-          <input type="text" id="auth-fullname" class="form-input" placeholder="أحمد محمود">
+          <input type="text" id="auth-fullname" class="form-input" placeholder="الاسم الأول والأخير">
         </div>
 
         <div class="form-group">
           <label class="form-label" for="auth-email">البريد الإلكتروني</label>
-          <input type="email" id="auth-email" class="form-input" required placeholder="user@smartwarranty.local">
+          <input type="email" id="auth-email" class="form-input" required placeholder="name@example.com">
+        </div>
+
+        <div class="form-group" id="group-phone" style="display: none;">
+          <label class="form-label" for="auth-phone">رقم الهاتف (اختياري)</label>
+          <input type="tel" id="auth-phone" class="form-input" placeholder="05XXXXXXXX">
         </div>
 
         <div class="form-group">
           <label class="form-label" for="auth-password">كلمة المرور</label>
           <input type="password" id="auth-password" class="form-input" required placeholder="••••••••">
+        </div>
+
+        <div class="form-group" id="group-confirm-password" style="display: none;">
+          <label class="form-label" for="auth-confirm-password">تأكيد كلمة المرور</label>
+          <input type="password" id="auth-confirm-password" class="form-input" placeholder="••••••••">
         </div>
 
         <div class="form-group" id="group-role" style="display: none;">
@@ -353,6 +469,11 @@
           </select>
         </div>
 
+        <div class="form-group" id="group-remember-me" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="auth-remember-me" style="width: 16px; height: 16px; cursor: pointer;">
+          <label for="auth-remember-me" style="font-size: 0.88rem; cursor: pointer; color: var(--text-muted);">تذكرني على هذا الجهاز</label>
+        </div>
+
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;" id="auth-submit-btn">تسجيل الدخول</button>
       </form>
 
@@ -360,6 +481,55 @@
         <span id="auth-toggle-text">ليس لديك حساب؟</span>
         <a href="#" id="auth-toggle-btn" style="color: var(--primary); font-weight: 700; text-decoration: none; margin-right: 6px;">إنشاء حساب جديد</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Address Modal -->
+  <div class="modal-overlay" id="address-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 id="address-modal-title" style="font-size: 1.4rem;">إضافة عنوان جديد</h2>
+        <button type="button" id="address-modal-close" style="background: none; border: none; color: var(--text-muted); font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+
+      <div id="address-form-alert" style="display: none; margin-bottom: 14px; padding: 10px; border-radius: 8px; font-size: 0.88rem;"></div>
+
+      <form id="address-form">
+        <input type="hidden" id="addr-id">
+        <div class="form-group">
+          <label class="form-label" for="addr-street">الشارع والحي</label>
+          <input type="text" id="addr-street" class="form-input" required placeholder="طريق الملك فهد، حي العليا">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label" for="addr-city">المدينة</label>
+            <input type="text" id="addr-city" class="form-input" required placeholder="الرياض">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addr-state">المنطقة / المحافظة</label>
+            <input type="text" id="addr-state" class="form-input" required placeholder="منطقة الرياض">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label" for="addr-postal">الرمز البريدي</label>
+            <input type="text" id="addr-postal" class="form-input" required placeholder="11564">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addr-country">الدولة</label>
+            <input type="text" id="addr-country" class="form-input" required value="Saudi Arabia">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+          <input type="checkbox" id="addr-is-default" style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="addr-is-default" style="font-weight: 600; font-size: 0.88rem; cursor: pointer;">تعيين كعنوان توصيل افتراضي</label>
+        </div>
+
+        <button type="submit" id="btn-save-address" class="btn btn-primary" style="width: 100%; margin-top: 10px;">حفظ العنوان</button>
+      </form>
     </div>
   </div>
 
