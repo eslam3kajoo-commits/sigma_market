@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllUsers, getUserById, updateUserProfile, updateUserRole, updateUserSchema, changeRoleSchema } from './users.controller';
+import { getAllUsers, getUserById, updateUserProfile, updateUserRole, changeUserPassword, updateUserSchema, changeRoleSchema, changePasswordSchema } from './users.controller';
 import { getUserAddresses, addAddress, updateAddress, deleteAddress, setDefaultAddress, createAddressSchema, updateAddressSchema } from './address.controller';
 import { authenticate } from '../../middleware/authenticate';
 import { requireRole, requireOwnership } from '../../middleware/authorize';
@@ -20,6 +20,7 @@ router.get('/', authenticate, requireRole('Admin'), getAllUsers);
 // User profile retrieval & update (Ownership protected or Admin)
 router.get('/:id', authenticate, requireOwnership('id'), getUserById);
 router.put('/:id', authenticate, requireOwnership('id'), validate(updateUserSchema), updateUserProfile);
+router.put('/:id/password', authenticate, requireOwnership('id'), validate(changePasswordSchema), changeUserPassword);
 
 // Admin-only critical action: Changing user role
 router.put('/:id/role', authenticate, requireRole('Admin'), validate(changeRoleSchema), updateUserRole);
