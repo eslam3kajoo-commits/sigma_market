@@ -125,7 +125,7 @@ async function loadProducts() {
                 <span class="product-name">${escapeHtml(prod.name)}</span>
                 <span class="product-barcode">${escapeHtml(prod.barcode)}</span>
               </div>
-              <div style="font-size: 0.82rem; color: var(--primary); font-weight: 700; margin-bottom: 6px;">📁 القسم: ${escapeHtml(categoryName)}</div>
+              <div style="font-size: 0.82rem; color: var(--primary); font-weight: 700; margin-bottom: 6px;">القسم: ${escapeHtml(categoryName)}</div>
               <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px; font-weight: 500;">${escapeHtml(prod.description)}</p>
               <div class="product-price">$${prod.price.toFixed(2)}</div>
             </div>
@@ -138,9 +138,9 @@ async function loadProducts() {
 
               ${canManage ? `
                 <div style="display: flex; gap: 6px; margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 10px;">
-                  <button onclick="openInventoryModal('${prod.id}', '${escapeHtml(prod.name)}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; flex: 1;">📊 المخزون</button>
-                  <button onclick="openEditProductModal('${prod.id}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; flex: 1;">✏️ تعديل</button>
-                  <button onclick="deleteProductAction('${prod.id}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: rgba(239,68,68,0.3);">🗑️ حذف</button>
+                  <button onclick="openInventoryModal('${prod.id}', '${escapeHtml(prod.name)}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; flex: 1;">المخزون</button>
+                  <button onclick="openEditProductModal('${prod.id}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; flex: 1;">تعديل</button>
+                  <button onclick="deleteProductAction('${prod.id}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: rgba(239,68,68,0.3);">حذف</button>
                 </div>
               ` : ''}
             </div>
@@ -420,7 +420,7 @@ async function triggerBarcodeAutoLookup(barcode, sourceId) {
         const p = data.data.product;
         resultEl.innerHTML = `
           <div style="background: rgba(16, 185, 129, 0.08); border: 1.5px solid #10b981; padding: 18px; border-radius: var(--radius-md);">
-            <h3 style="color: #059669; margin-bottom: 10px; font-weight: 800;">✔ مسجل وموثق بالضمان</h3>
+            <h3 style="color: #059669; margin-bottom: 10px; font-weight: 800;">مسجل وموثق بالضمان</h3>
             <p style="margin-bottom: 4px;"><strong>المنتج:</strong> ${escapeHtml(p.name)}</p>
             <p style="margin-bottom: 4px;"><strong>القسم:</strong> ${escapeHtml(p.category ? p.category.name : 'عام')}</p>
             <p style="margin-bottom: 4px;"><strong>الباركود:</strong> <code style="background: #ffffff; padding: 2px 6px; border-radius: 4px;">${escapeHtml(p.barcode)}</code></p>
@@ -432,7 +432,7 @@ async function triggerBarcodeAutoLookup(barcode, sourceId) {
       } else {
         resultEl.innerHTML = `
           <div style="background: rgba(239, 68, 68, 0.08); border: 1.5px solid #ef4444; padding: 18px; border-radius: var(--radius-md); color: #dc2626; font-weight: 600;">
-            ✖ لا يوجد سجل ضمان أو منتج مطابق للباركود '${escapeHtml(barcode)}'.
+            لا يوجد سجل ضمان أو منتج مطابق للباركود '${escapeHtml(barcode)}'.
           </div>
         `;
       }
@@ -459,9 +459,9 @@ async function triggerBarcodeAutoLookup(barcode, sourceId) {
         if (catEl && p.categoryId) catEl.value = p.categoryId;
         if (p.expiryDate) document.getElementById('prod-expiry').value = p.expiryDate.split('T')[0];
 
-        statusNotice.innerHTML = `<span style="color: #059669;">✔ تم العثور على المنتج: "${escapeHtml(p.name)}". تم تعبئة البيانات تلقائياً.</span>`;
+        statusNotice.innerHTML = `<span style="color: #059669;">تم العثور على المنتج: "${escapeHtml(p.name)}". تم تعبئة البيانات تلقائياً.</span>`;
       } else {
-        statusNotice.innerHTML = `<span style="color: #2563eb;">✨ باركود جديد ('${escapeHtml(barcode)}'). يمكنك تعبئة نموذج إضافة المنتج جديد.</span>`;
+        statusNotice.innerHTML = `<span style="color: #2563eb;">باركود جديد ('${escapeHtml(barcode)}'). يمكنك تعبئة نموذج إضافة المنتج جديد.</span>`;
       }
     }
   } catch (err) {
@@ -492,7 +492,7 @@ async function loadRoles() {
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <button onclick="demoLogin('${role.name}')" class="btn btn-primary" style="flex: 1; padding: 8px 12px; font-size: 0.82rem;">
-                🚀 تجربة الدخول كـ (${translatedRoleName})
+                تجربة الدخول كـ (${translatedRoleName})
               </button>
               <button onclick="openRegisterForRole('${role.name}')" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;">
                 حساب جديد
@@ -528,7 +528,7 @@ function renderFallbackRolesUI() {
       </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button onclick="demoLogin('${role.name}')" class="btn btn-primary" style="flex: 1; padding: 8px 12px; font-size: 0.82rem;">
-          🚀 تجربة الدخول كـ (${role.title})
+          تجربة الدخول كـ (${role.title})
         </button>
         <button onclick="openRegisterForRole('${role.name}')" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;">
           حساب جديد

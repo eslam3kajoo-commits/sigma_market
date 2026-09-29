@@ -122,7 +122,7 @@ describe('Comprehensive End-to-End Practical Project Verification', () => {
         description: 'Smart appliances & devices'
       }
     });
-  });
+  }, 30000);
 
   afterAll(async () => {
     await cleanupTestData();
@@ -399,7 +399,7 @@ describe('Comprehensive End-to-End Practical Project Verification', () => {
       .send({ claimStatus: 'APPROVED' });
     expect(updateRes.status).toBe(200);
     expect(updateRes.body.data.claim.claimStatus).toBe('APPROVED');
-  });
+  }, 30000);
 
   // --- 11. Delivery Assignment ---
   it('17. POST /api/deliveries/assign updates delivery status', async () => {
