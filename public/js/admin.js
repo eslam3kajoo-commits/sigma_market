@@ -118,8 +118,8 @@ async function loadAdminCategories() {
           <td><span class="badge badge-info">${c._count ? c._count.products : 0} منتجات</span></td>
           <td>${new Date(c.createdAt).toLocaleDateString('ar-EG')}</td>
           <td>
-            <button onclick="openEditCategoryModal('${c.id}', '${escapeHtml(c.name)}', '${escapeHtml(c.description || '')}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">✏️ تعديل</button>
-            <button onclick="deleteCategoryAction('${c.id}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239,68,68,0.3); margin-right: 4px;">🗑️ حذف</button>
+            <button onclick="openEditCategoryModal('${c.id}', '${escapeHtml(c.name)}', '${escapeHtml(c.description || '')}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">تعديل</button>
+            <button onclick="deleteCategoryAction('${c.id}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem; color: #ef4444; border-color: rgba(239,68,68,0.3); margin-right: 4px;">حذف</button>
           </td>
         </tr>
       `).join('');

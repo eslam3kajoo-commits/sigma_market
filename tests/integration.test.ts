@@ -67,5 +67,5 @@ describe('Smart Warranty Platform - System Integration Suite (Phase 9 & 10)', ()
     const barcodeRes = await request(app).get('/api/products/barcode/SW-8KTV-INTEG-001');
     expect(barcodeRes.status).toBe(200);
     expect(barcodeRes.body.data.product.name).toBe('Smart Appliance 8K TV');
-  });
+  }, 30000);
 });

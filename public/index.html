@@ -49,7 +49,7 @@
   <!-- Hero & Status Section -->
   <main class="container">
     <section class="hero-section">
-      <div class="hero-badge">🛒 نظام إدارة المبيعات والضمان لسيجما ماركت</div>
+      <div class="hero-badge">نظام إدارة المبيعات والضمان لسيجما ماركت</div>
       <h1 class="hero-title">محرك سيجما ماركت - Sigma Market</h1>
       <p class="hero-subtitle">
         بنية مؤسسية متكاملة لإدارة منتجات سيجما ماركت، الأقسام، الضمان، تتبع ومسح الباركود، وإدارة المخزون والتخفيضات الفورية.
@@ -101,9 +101,8 @@
       <!-- Filter Bar -->
       <div class="filter-bar">
         <div style="flex: 1; min-width: 260px; display: flex; gap: 8px; flex-wrap: wrap;">
-          <input type="text" id="catalog-search-input" class="form-input" placeholder="🔍 بحث باسم المنتج أو الباركود..." style="flex: 1; min-width: 180px;">
-          <button type="button" class="btn btn-primary btn-scan-camera" data-target="catalog-search-input" style="white-space: nowrap; font-weight: 800; display: flex; align-items: center; gap: 6px; padding: 8px 14px;">
-            <span>📷</span>
+          <input type="text" id="catalog-search-input" class="form-input" placeholder="بحث باسم المنتج أو الباركود..." style="flex: 1; min-width: 180px;">
+          <button type="button" class="btn btn-primary btn-scan-camera" data-target="catalog-search-input" style="white-space: nowrap; font-weight: 800; padding: 8px 14px;">
             <span>مسح بكاميرا الهاتف</span>
           </button>
         </div>
@@ -135,7 +134,7 @@
     <div id="tab-barcode" class="tab-content" style="display: none;">
       <div class="card" style="max-width: 720px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h2 style="font-size: 1.6rem; margin-bottom: 8px;">🔍 نظام فحص الضمان ومسح الباركود</h2>
+          <h2 style="font-size: 1.6rem; margin-bottom: 8px;">نظام فحص الضمان ومسح الباركود</h2>
           <p style="color: var(--text-muted); font-size: 0.95rem;">
             يدعم النظام قراءة الباركود عبر **جهاز السكنر الخارجي (USB/Bluetooth)** أو عبر **كاميرا الهاتف والكمبيوتر مباشرة**.
           </p>
@@ -143,19 +142,17 @@
 
         <!-- Scanner Methods Indicator Bar -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px;">
-          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">🔌</div>
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 14px; border-radius: 12px;">
             <div>
               <div style="font-weight: 800; color: #10b981; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
                 <span>قارئ الباركود الخارجي (USB/BT)</span>
-                <span class="badge badge-success" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px;">جاهز ومستعد (Laser/USB) ⚡</span>
+                <span class="badge badge-success" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px;">جاهز ومستعد (Laser/USB)</span>
               </div>
               <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">جاهز ومستعد للمسح التلقائي المباشر في أي وقت</div>
             </div>
           </div>
 
-          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); padding: 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem;">📷</div>
+          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); padding: 14px; border-radius: 12px;">
             <div>
               <div style="font-weight: 800; color: #3b82f6; font-size: 0.95rem;">كاميرا الهاتف / الكمبيوتر</div>
               <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">انقر على زر الكاميرا بالأسفل لفتح قارئ الباركود</div>
@@ -168,18 +165,17 @@
             <label class="form-label" for="barcode-input" style="font-weight: 700;">رقم باركود المنتج (Barcode)</label>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <input type="text" id="barcode-input" class="form-input" placeholder="أدخل أو امسح الباركود (مثال: SW-OLED-4K-001)" required style="flex: 1; min-width: 200px; font-size: 1rem; font-weight: 600;">
-              <button type="button" class="btn btn-primary btn-scan-camera" data-target="barcode-input" style="white-space: nowrap; font-weight: 800; padding: 10px 18px; display: flex; align-items: center; gap: 8px;">
-                <span>📷</span>
+              <button type="button" class="btn btn-primary btn-scan-camera" data-target="barcode-input" style="white-space: nowrap; font-weight: 800; padding: 10px 18px;">
                 <span>مسح بكاميرا الهاتف</span>
               </button>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; font-weight: 800; padding: 12px;">⚡ فحص حالة الضمان والصلاحية</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; font-weight: 800; padding: 12px;">فحص حالة الضمان والصلاحية</button>
         </form>
 
         <!-- Sample Barcodes for Quick Testing in Graduation Demo -->
         <div style="margin-top: 20px; padding: 12px 16px; background: rgba(241, 245, 249, 0.6); border-radius: 10px; border: 1px dashed #cbd5e1;">
-          <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700; margin-bottom: 8px;">💡 أكواد باركود تجريبية لاختبار العرض لمشروع التخرج:</div>
+          <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700; margin-bottom: 8px;">أكواد باركود تجريبية لاختبار العرض لمشروع التخرج:</div>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
             <button type="button" onclick="document.getElementById('barcode-input').value='SW-OLED-4K-001'; triggerBarcodeAutoLookup('SW-OLED-4K-001', 'barcode-input');" class="btn btn-outline" style="font-size: 0.78rem; padding: 4px 10px;">SW-OLED-4K-001</button>
             <button type="button" onclick="document.getElementById('barcode-input').value='SW-FRIDGE-500L'; triggerBarcodeAutoLookup('SW-FRIDGE-500L', 'barcode-input');" class="btn btn-outline" style="font-size: 0.78rem; padding: 4px 10px;">SW-FRIDGE-500L</button>
@@ -204,7 +200,7 @@
             <label class="form-label" for="prod-barcode">الباركود الفريد (Barcode)</label>
             <div style="display: flex; gap: 8px;">
               <input type="text" id="prod-barcode" class="form-input" required placeholder="SW-PROD-9988" style="flex: 1;">
-              <button type="button" class="btn btn-outline btn-scan-camera" data-target="prod-barcode" style="white-space: nowrap; font-weight: 700;">📷 مسح بالكاميرا</button>
+              <button type="button" class="btn btn-outline btn-scan-camera" data-target="prod-barcode" style="white-space: nowrap; font-weight: 700;">مسح بالكاميرا</button>
             </div>
           </div>
           <div class="form-group">
@@ -337,7 +333,7 @@
   <div class="modal-overlay" id="camera-scanner-modal">
     <div class="modal-content" style="max-width: 520px; text-align: center;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="font-size: 1.3rem;">📷 مسح الباركود بالكاميرا</h3>
+        <h3 style="font-size: 1.3rem;">مسح الباركود بالكاميرا</h3>
         <button type="button" onclick="closeCameraScannerModal()" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
       </div>
       <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">قم بتوجيه كاميرا الجهاز نحو الباركود للقراءة المباشرة والتلقائية.</p>
@@ -359,7 +355,7 @@
           <label class="form-label" for="edit-prod-barcode">الباركود</label>
           <div style="display: flex; gap: 8px;">
             <input type="text" id="edit-prod-barcode" class="form-input" required style="flex: 1;">
-            <button type="button" class="btn btn-outline btn-scan-camera" data-target="edit-prod-barcode" style="white-space: nowrap; font-weight: 700;">📷 مسح بالكاميرا</button>
+            <button type="button" class="btn btn-outline btn-scan-camera" data-target="edit-prod-barcode" style="white-space: nowrap; font-weight: 700;">مسح بالكاميرا</button>
           </div>
         </div>
         <div class="form-group">
