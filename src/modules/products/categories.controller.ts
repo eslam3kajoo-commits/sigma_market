@@ -73,7 +73,7 @@ export const createCategory = async (req: Request, res: Response) => {
     });
 
     if (existingCategory) {
-      return sendError(res, `Category with name '${name}' already exists.`, 409);
+      return sendError(res, 'هذا القسم موجود بالفعل.', 409);
     }
 
     if (parentId) {
@@ -110,7 +110,7 @@ export const updateCategory = async (req: Request, res: Response) => {
     if (name && name !== existingCategory.name) {
       const duplicate = await prisma.category.findUnique({ where: { name } });
       if (duplicate) {
-        return sendError(res, `Category name '${name}' is already taken.`, 409);
+        return sendError(res, 'هذا القسم موجود بالفعل.', 409);
       }
     }
 

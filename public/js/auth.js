@@ -4,6 +4,17 @@
 
 const API_BASE = '';
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+window.escapeHtml = escapeHtml;
+
 const ROLE_MAP = {
   'Admin': 'مدير النظام (أدمن)',
   'Merchant': 'تاجر (مدير المتجر)',

@@ -2,6 +2,18 @@
    Sigma Market - Admin Panel Integration Logic
    ========================================================================== */
 
+if (typeof window.escapeHtml === 'undefined') {
+  window.escapeHtml = function(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   verifyAdminAccess();
 });
@@ -285,12 +297,17 @@ function setupAdminEvents() {
         }
 
         const data = await res.json();
+        if (res.status === 409) {
+          alert('هذا القسم موجود بالفعل.');
+          return;
+        }
+
         if (data.success) {
           alert('تم حفظ القسم بنجاح!');
           closeCategoryModal();
           loadAdminCategories();
         } else {
-          alert(`خطأ: ${data.message}`);
+          alert(data.message || 'فشل حفظ بيانات القسم.');
         }
       } catch (err) {
         alert('فشل حفظ بيانات القسم.');
