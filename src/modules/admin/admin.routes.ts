@@ -7,7 +7,9 @@ import {
   getPendingApprovals,
   setOrUpdateCommission,
   commissionSchema,
-  getAuditLogs
+  getAuditLogs,
+  deleteUser,
+  clearTestAccounts
 } from './admin.controller';
 import { updateUserRole, changeRoleSchema } from '../users/users.controller';
 import { authenticate } from '../../middleware/authenticate';
@@ -21,6 +23,9 @@ router.use(authenticate, requireRole('Admin'));
 
 router.get('/metrics', getSystemMetrics);
 router.get('/users', getAdminUsersList);
+router.delete('/users/clear-test-accounts', clearTestAccounts);
+router.post('/users/clear-test-accounts', clearTestAccounts);
+router.delete('/users/:id', deleteUser);
 router.patch('/users/:id/status', validate(updateUserStatusSchema), toggleUserStatus);
 router.put('/users/:id/role', validate(changeRoleSchema), updateUserRole);
 

@@ -112,6 +112,9 @@ async function loadAdminUsers() {
               <button onclick="promptRoleChange('${u.id}', '${u.role.name}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem; font-weight: 700; margin-right: 4px;">
                 تعديل الدور
               </button>
+              <button onclick="deleteUserAction('${u.id}', '${escapeHtml(u.fullName)}')" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem; font-weight: 700; color: #ef4444; border-color: rgba(239,68,68,0.3); margin-right: 4px;">
+                حذف الحساب
+              </button>
             </td>
           </tr>
         `;
@@ -257,9 +260,61 @@ async function promptRoleChange(userId, currentRole) {
   }
 }
 
+async function deleteUserAction(userId, userName) {
+  if (!confirm(`هل أنت تأكد من حذف حساب "${userName}" نهائياً من النظام؟`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: Auth.getHeaders()
+    });
+    if (handleUnauthorized(res)) return;
+    const data = await res.json();
+
+    if (data.success) {
+      alert('تم حذف الحساب بنجاح.');
+      loadAdminUsers();
+      loadAdminMetrics();
+    } else {
+      alert(`فشلت عملية الحذف: ${data.message}`);
+    }
+  } catch (err) {
+    alert('حدث خطأ أثناء محاولة حذف الحساب.');
+  }
+}
+
+async function clearTestAccountsAction() {
+  if (!confirm('هل أنت تأكد من إزالة جميع الحسابات التجريبية والاختبارية من المنصة؟ لن يتم حذف أي حساب حقيقي.')) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users/clear-test-accounts`, {
+      method: 'DELETE',
+      headers: Auth.getHeaders()
+    });
+    if (handleUnauthorized(res)) return;
+    const data = await res.json();
+
+    if (data.success) {
+      alert(data.message || 'تم تنظيف الحسابات التجريبية بنجاح.');
+      loadAdminUsers();
+      loadAdminMetrics();
+    } else {
+      alert(`فشلت عملية التنظيف: ${data.message}`);
+    }
+  } catch (err) {
+    alert('حدث خطأ أثناء تنظيف الحسابات التجريبية.');
+  }
+}
+
 // Bind handlers to window object
 window.toggleStatus = toggleStatus;
 window.promptRoleChange = promptRoleChange;
+window.deleteUserAction = deleteUserAction;
+window.clearTestAccountsAction = clearTestAccountsAction;
 
 function setupAdminEvents() {
   document.getElementById('user-search-input').addEventListener('input', loadAdminUsers);
