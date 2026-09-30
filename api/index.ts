@@ -2,7 +2,17 @@ import path from 'path';
 import fs from 'fs';
 
 try {
-  const isPostgres = process.env.DATABASE_URL?.startsWith('postgres') || process.env.DATABASE_URL?.startsWith('postgresql');
+  if (process.env.DATABASE_URL) {
+    let dbUrl = process.env.DATABASE_URL.trim();
+    if ((dbUrl.startsWith('"') && dbUrl.endsWith('"')) || (dbUrl.startsWith("'") && dbUrl.endsWith("'"))) {
+      dbUrl = dbUrl.slice(1, -1).trim();
+    }
+    process.env.DATABASE_URL = dbUrl;
+  }
+
+  const dbUrl = process.env.DATABASE_URL || '';
+  const isPostgres = dbUrl.startsWith('postgres://') || dbUrl.startsWith('postgresql://');
+
   if (!isPostgres) {
     const tmpDbPath = path.join('/tmp', 'dev.db');
     const localDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
@@ -18,7 +28,7 @@ try {
     }
   }
 } catch (err) {
-  console.error('Error preparing SQLite database for serverless execution:', err);
+  console.error('Error preparing database for serverless execution:', err);
 }
 
 import app from '../src/app';
