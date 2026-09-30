@@ -16,7 +16,7 @@ export const getAllRoles = async (req: Request, res: Response) => {
       }
     });
 
-    const formattedRoles = roles.map((r) => ({
+    const formattedRoles = roles.map((r: any) => ({
       ...r,
       permissions: JSON.parse(r.permissions || '[]')
     }));

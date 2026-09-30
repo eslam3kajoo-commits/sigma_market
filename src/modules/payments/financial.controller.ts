@@ -128,7 +128,7 @@ export const getMerchantPayouts = async (req: Request, res: Response) => {
       select: { id: true }
     });
 
-    const productIds = merchantProducts.map(p => p.id);
+    const productIds = merchantProducts.map((p: any) => p.id);
 
     // Fetch order items sold
     const orderItems = await prisma.orderItem.findMany({
@@ -142,8 +142,8 @@ export const getMerchantPayouts = async (req: Request, res: Response) => {
 
     // Calculate total paid sales
     let totalSales = 0;
-    orderItems.forEach(item => {
-      const isPaid = item.order.payments.some(p => p.status === 'PAID');
+    orderItems.forEach((item: any) => {
+      const isPaid = item.order.payments.some((p: any) => p.status === 'PAID');
       if (isPaid) {
         totalSales += item.unitPrice * item.quantity;
       }
