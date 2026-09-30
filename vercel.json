@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "env": {
-    "DATABASE_URL": "postgresql://neondb_owner:npg_Rz8XNPvL2exq@ep-icy-shadow-axama5il-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-    "JWT_SECRET": "development_smart_warranty_jwt_secret_key_2026",
-    "NODE_ENV": "production"
-  },
   "functions": {
     "api/index.ts": {
       "includeFiles": "prisma/**:public/**"
