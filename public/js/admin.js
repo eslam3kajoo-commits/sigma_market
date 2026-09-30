@@ -177,6 +177,7 @@ window.deleteCategoryAction = async function(id) {
       method: 'DELETE',
       headers: Auth.getHeaders()
     });
+    if (handleUnauthorized(res)) return;
 
     const data = await res.json();
     if (data.success) {
@@ -201,6 +202,7 @@ async function toggleStatus(userId, currentStatus) {
       headers: Auth.getHeaders(),
       body: JSON.stringify({ status: newStatus })
     });
+    if (handleUnauthorized(res)) return;
     const data = await res.json();
 
     if (data.success) {
@@ -229,6 +231,7 @@ async function promptRoleChange(userId, currentRole) {
       headers: Auth.getHeaders(),
       body: JSON.stringify({ roleName: newRole })
     });
+    if (handleUnauthorized(res)) return;
     const data = await res.json();
 
     if (data.success) {
@@ -275,6 +278,11 @@ function setupAdminEvents() {
           headers: Auth.getHeaders(),
           body: JSON.stringify({ name, description })
         });
+
+        if (handleUnauthorized(res)) {
+          closeCategoryModal();
+          return;
+        }
 
         const data = await res.json();
         if (data.success) {
