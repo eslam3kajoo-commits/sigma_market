@@ -1,31 +1,19 @@
 import path from 'path';
 import fs from 'fs';
 
+const DEFAULT_POSTGRES_URL = "postgresql://neondb_owner:npg_Rz8XNPvL2exq@ep-icy-shadow-axama5il-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+
 try {
-  if (process.env.DATABASE_URL) {
-    let dbUrl = process.env.DATABASE_URL.trim();
-    if ((dbUrl.startsWith('"') && dbUrl.endsWith('"')) || (dbUrl.startsWith("'") && dbUrl.endsWith("'"))) {
-      dbUrl = dbUrl.slice(1, -1).trim();
-    }
-    process.env.DATABASE_URL = dbUrl;
+  let dbUrl = (process.env.DATABASE_URL || '').trim();
+  if ((dbUrl.startsWith('"') && dbUrl.endsWith('"')) || (dbUrl.startsWith("'") && dbUrl.endsWith("'"))) {
+    dbUrl = dbUrl.slice(1, -1).trim();
   }
 
-  const dbUrl = process.env.DATABASE_URL || '';
   const isPostgres = dbUrl.startsWith('postgres://') || dbUrl.startsWith('postgresql://');
-
   if (!isPostgres) {
-    const tmpDbPath = path.join('/tmp', 'dev.db');
-    const localDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-
-    if (!fs.existsSync(tmpDbPath) && fs.existsSync(localDbPath)) {
-      fs.copyFileSync(localDbPath, tmpDbPath);
-    }
-
-    if (fs.existsSync(tmpDbPath)) {
-      process.env.DATABASE_URL = `file:${tmpDbPath}`;
-    } else if (!process.env.DATABASE_URL) {
-      process.env.DATABASE_URL = `file:${localDbPath}`;
-    }
+    process.env.DATABASE_URL = DEFAULT_POSTGRES_URL;
+  } else {
+    process.env.DATABASE_URL = dbUrl;
   }
 } catch (err) {
   console.error('Error preparing database for serverless execution:', err);
