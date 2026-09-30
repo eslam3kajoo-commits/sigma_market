@@ -25,12 +25,25 @@ async function verifyAdminAccess() {
   setupAdminEvents();
 }
 
+function handleUnauthorized(res) {
+  if (res.status === 401 || res.status === 403) {
+    const unauthorizedCard = document.getElementById('admin-unauthorized-card');
+    const adminBody = document.getElementById('admin-panel-body');
+    if (unauthorizedCard) unauthorizedCard.style.display = 'block';
+    if (adminBody) adminBody.style.display = 'none';
+    Auth.clearSession();
+    return true;
+  }
+  return false;
+}
+
 async function loadAdminMetrics() {
   try {
     const res = await fetch(`${API_BASE}/api/admin/metrics`, { headers: Auth.getHeaders() });
+    if (handleUnauthorized(res)) return;
     const data = await res.json();
 
-    if (data.success && data.data.metrics) {
+    if (data.success && data.data && data.data.metrics) {
       const m = data.data.metrics;
       document.getElementById('m-users').textContent = m.totalUsers;
       document.getElementById('m-merchants').textContent = m.totalMerchants;
@@ -54,6 +67,7 @@ async function loadAdminUsers() {
 
   try {
     const res = await fetch(url, { headers: Auth.getHeaders() });
+    if (handleUnauthorized(res)) return;
     const data = await res.json();
 
     if (data.success && data.data.users) {
