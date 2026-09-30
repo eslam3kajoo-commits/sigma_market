@@ -102,9 +102,12 @@ async function loadAdminCategories() {
 
   try {
     const res = await fetch(`${API_BASE}/api/categories`);
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
 
-    if (data.success && data.data.categories) {
+    if (data.success && data.data && data.data.categories) {
       const categories = data.data.categories;
       if (categories.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-weight: 600;">لا توجد أقسام مسجلة حالياً. قم بإضافة قسم جديد.</td></tr>`;
@@ -123,9 +126,12 @@ async function loadAdminCategories() {
           </td>
         </tr>
       `).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; font-weight: 700;">فشل جلب قائمة الأقسام: ${escapeHtml(data.message || 'خطأ غير معروف')}</td></tr>`;
     }
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; font-weight: 700;">فشل جلب قائمة الأقسام.</td></tr>`;
+    console.error('Error in loadAdminCategories:', err);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; font-weight: 700;">فشل جلب قائمة الأقسام. يرجى التأكد من تشغيل الخادم والاتصال بالشبكة.</td></tr>`;
   }
 }
 
