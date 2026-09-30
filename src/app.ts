@@ -1,3 +1,8 @@
+const DEFAULT_POSTGRES_URL = "postgresql://neondb_owner:npg_Rz8XNPvL2exq@ep-icy-shadow-axama5il-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+if (!process.env.DATABASE_URL || (!process.env.DATABASE_URL.startsWith('postgres://') && !process.env.DATABASE_URL.startsWith('postgresql://'))) {
+  process.env.DATABASE_URL = DEFAULT_POSTGRES_URL;
+}
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
